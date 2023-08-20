@@ -6,23 +6,16 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.UploadTask
 import com.iksanova.mingle.R
 import com.iksanova.mingle.base.BaseActivity
 import com.iksanova.mingle.constants.Constants.INFO
@@ -31,14 +24,14 @@ import com.iksanova.mingle.utils.AppSharedPreferences
 import com.iksanova.mingle.utils.LoadingDialog
 
 class SharePostActivity : BaseActivity() {
-    private lateinit var edit_text: EditText
-    private lateinit var post_img: ImageView
-    private lateinit var btn_select_img: ImageView
+    private lateinit var editText: EditText
+    private lateinit var postImg: ImageView
+    private lateinit var btnSelectImg: ImageView
     private lateinit var profileImg: ImageView
     private lateinit var closeImg: ImageView
     private lateinit var userName: TextView
-    private lateinit var btn_post: TextView
-    private val PICK_IMAGE_REQUEST = 1
+    private lateinit var btnPost: TextView
+    private val pickImageRequest = 1
     private var mImageUri: Uri? = null
     private lateinit var mStorageRef: StorageReference
     private lateinit var auth: FirebaseAuth
@@ -54,10 +47,10 @@ class SharePostActivity : BaseActivity() {
         auth = FirebaseAuth.getInstance()
         user = auth.currentUser!!
         mStorageRef = FirebaseStorage.getInstance().reference
-        edit_text = findViewById(R.id.edit_text)
-        post_img = findViewById(R.id.post_img)
-        btn_select_img = findViewById(R.id.img3)
-        btn_post = findViewById(R.id.btn_post)
+        editText = findViewById(R.id.edit_text)
+        postImg = findViewById(R.id.post_img)
+        btnSelectImg = findViewById(R.id.img3)
+        btnPost = findViewById(R.id.btn_post)
         userName = findViewById(R.id.user_name)
         profileImg = findViewById(R.id.user_img)
         closeImg = findViewById(R.id.close_img)
@@ -69,28 +62,28 @@ class SharePostActivity : BaseActivity() {
         closeImg.setOnClickListener { finish() }
 
         // Select Image
-        btn_select_img.setOnClickListener { openFileChooser() }
+        btnSelectImg.setOnClickListener { openFileChooser() }
 
-        edit_text.requestFocus()
-        edit_text.addTextChangedListener(object : TextWatcher {
+        editText.requestFocus()
+        editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                btn_post.setTextColor(Color.BLACK)
+                btnPost.setTextColor(Color.BLACK)
             }
 
             override fun afterTextChanged(s: Editable?) {}
         })
 
         // Post Button
-        btn_post.setOnClickListener {
+        btnPost.setOnClickListener {
             if (mImageUri != null) {
                 loadingDialog.startLoadingDialog()
                 uploadFile(mImageUri!!)
             } else {
-                if (!edit_text.text.toString().isEmpty())
+                if (!editText.text.toString().isEmpty())
                     loadingDialog.startLoadingDialog()
-                uploadData(edit_text.text.toString())
+                uploadData(editText.text.toString())
             }
         }
     }
@@ -116,13 +109,13 @@ class SharePostActivity : BaseActivity() {
         val intent = Intent()
         intent.action = Intent.ACTION_GET_CONTENT
         intent.type = "image/*"
-        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+        startActivityForResult(intent, pickImageRequest)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+        if (requestCode == pickImageRequest && resultCode == RESULT_OK && data != null) {
             mImageUri = data.data
             CropImage.activity(mImageUri)
                 .start(this)
@@ -132,8 +125,8 @@ class SharePostActivity : BaseActivity() {
             if (resultCode == RESULT_OK) {
                 mImageUri = result.uri
                 Glide.with(this).load(mImageUri)
-                    .into(post_img)
-                btn_post.setTextColor(Color.BLACK)
+                    .into(postImg)
+                btnPost.setTextColor(Color.BLACK)
 
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 val error = result.error
@@ -153,7 +146,7 @@ class SharePostActivity : BaseActivity() {
                         val map: HashMap<String, Any> = HashMap()
                         val imageUrl = uri.toString()
                         map["imgUrl"] = imageUrl
-                        map["description"] = edit_text.text.toString()
+                        map["description"] = editText.text.toString()
                         map["username"] = appSharedPreferences.getUserName()
                         map["user_profile"] = appSharedPreferences.getImgUrl()
                         map["key"] = key!!

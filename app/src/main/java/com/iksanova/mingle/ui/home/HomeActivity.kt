@@ -3,9 +3,6 @@ package com.iksanova.mingle.ui.home
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
-import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.GravityCompat
@@ -40,11 +37,11 @@ class HomeActivity : BaseActivity() {
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var profileImg: ImageView
     private lateinit var messageBtn: ImageView
-    private lateinit var nav_img: ImageView
-    private lateinit var nav_close_img: ImageView
+    private lateinit var navImg: ImageView
+    private lateinit var navCloseImg: ImageView
     private lateinit var mNavigationView: NavigationView
     private lateinit var tt: TextView
-    private lateinit var nav_name: TextView
+    private lateinit var navName: TextView
     private lateinit var bottomNavigationView: BottomNavigationView
     private var selectedFragment: Fragment? = null
     private lateinit var appSharedPreferences: AppSharedPreferences
@@ -70,9 +67,9 @@ class HomeActivity : BaseActivity() {
 
         // Header
         val header = mNavigationView.getHeaderView(0)
-        nav_name = header.findViewById(R.id.user_name)
-        nav_img = header.findViewById(R.id.img)
-        nav_close_img = header.findViewById(R.id.close_img)
+        navName = header.findViewById(R.id.user_name)
+        navImg = header.findViewById(R.id.img)
+        navCloseImg = header.findViewById(R.id.close_img)
         tt = header.findViewById(R.id.tt)
 
         //Open Profile Activity
@@ -80,11 +77,11 @@ class HomeActivity : BaseActivity() {
 
         // Set Header Data
         Glide.with(this).load(appSharedPreferences.imgUrl).into(profileImg)
-        Glide.with(this).load(appSharedPreferences.imgUrl).into(nav_img)
-        nav_name.text = appSharedPreferences.userName
+        Glide.with(this).load(appSharedPreferences.imgUrl).into(navImg)
+        navName.text = appSharedPreferences.userName
 
         //NavBar Close
-        nav_close_img.setOnClickListener {
+        navCloseImg.setOnClickListener {
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START)
             }

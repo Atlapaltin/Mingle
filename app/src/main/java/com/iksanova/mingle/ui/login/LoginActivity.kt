@@ -128,7 +128,7 @@ class LoginActivity : BaseActivity(), ServiceListener {
                 }
             }
             .addOnFailureListener(this) { e ->
-                Log.d(TAG, e.localizedMessage)
+                e.localizedMessage?.let { Log.d(TAG, it) }
             }
     }
 

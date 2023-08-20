@@ -1,9 +1,7 @@
 package com.iksanova.mingle.adapters
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -15,10 +13,8 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.iksanova.mingle.R
@@ -27,7 +23,6 @@ import com.iksanova.mingle.ui.story.AddStoryActivity
 import com.iksanova.mingle.ui.story.StoryActivity
 import com.iksanova.mingle.utils.UniversalImageLoderClass
 import de.hdodenhof.circleimageview.CircleImageView
-import java.util.Objects
 
 class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>) : RecyclerView.Adapter<StoryAdapter.MyViewHolder>() {
 
@@ -48,12 +43,12 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
             seenStory(holder, model.userId)
         }
         if (holder.adapterPosition == 0) {
-            myStory(holder.addStory_text, holder.story_plus, false, holder)
+            myStory(holder.addStoryText, holder.storyPlus, false, holder)
         }
 
         holder.itemView.setOnClickListener {
             if (holder.adapterPosition == 0) {
-                myStory(holder.addStory_text, holder.story_plus, true, holder)
+                myStory(holder.addStoryText, holder.storyPlus, true, holder)
             } else {
                 val intent = Intent(aCtx, StoryActivity::class.java)
                 intent.putExtra("userid", model.userId)
@@ -82,11 +77,15 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
             override fun onDataChange(snapshot: DataSnapshot) {
                 val name = snapshot.child("username").getValue(String::class.java)
                 val img = snapshot.child("imageUrl").getValue(String::class.java)
-                UniversalImageLoderClass.setImage(img, holder.story_photo, null)
+                if (img != null) {
+                    UniversalImageLoderClass.setImage(img, holder.storyPhoto, null)
+                }
 
                 if (position != 0) {
-                    UniversalImageLoderClass.setImage(img, holder.story_photo, null)
-                    holder.story_username.text = name
+                    if (img != null) {
+                        UniversalImageLoderClass.setImage(img, holder.storyPhoto, null)
+                    }
+                    holder.storyUsername.text = name
                 }
             }
 
@@ -132,13 +131,13 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
                     }
                 } else {
                     if (count > 0) {
-                        textView.text = "Your Story"
-                        holder.story_photo_seen_layout.setBackgroundResource(R.drawable.profile_picture_gradient)
+                        textView.text = "Твоя история"
+                        holder.storyPhotoSeenLayout.setBackgroundResource(R.drawable.profile_picture_gradient)
                         imageView.visibility = View.GONE
-                        holder.white_card.visibility = View.GONE
+                        holder.whiteCard.visibility = View.GONE
 
                     } else {
-                        textView.text = "Add Story"
+                        textView.text = "Создай историю"
                         imageView.visibility = View.VISIBLE
                     }
 
@@ -163,12 +162,12 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
                     }
                 }
                 if (i > 0) {
-                    holder.story_photo.visibility = View.VISIBLE
-                    holder.story_photo_seen_layout.setBackgroundResource(R.drawable.profile_picture_gradient)
+                    holder.storyPhoto.visibility = View.VISIBLE
+                    holder.storyPhotoSeenLayout.setBackgroundResource(R.drawable.profile_picture_gradient)
 
                 } else {
-                    holder.story_photo_seen_layout.setBackgroundColor(Color.GRAY)
-                    holder.story_photo.visibility = View.VISIBLE
+                    holder.storyPhotoSeenLayout.setBackgroundColor(Color.GRAY)
+                    holder.storyPhoto.visibility = View.VISIBLE
 
                 }
             }
@@ -182,12 +181,12 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
     }
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var story_username: TextView = itemView.findViewById(R.id.story_username)
-        var addStory_text: TextView = itemView.findViewById(R.id.mystorytext)
-        var story_plus: ImageView = itemView.findViewById(R.id.add_story)
-        var story_photo: CircleImageView = itemView.findViewById(R.id.button_image)
-        var story_photo_seen_layout: RelativeLayout = itemView.findViewById(R.id.button_click_parent)
-        var white_card: CardView = itemView.findViewById(R.id.white_card)
+        var storyUsername: TextView = itemView.findViewById(R.id.story_username)
+        var addStoryText: TextView = itemView.findViewById(R.id.mystorytext)
+        var storyPlus: ImageView = itemView.findViewById(R.id.add_story)
+        var storyPhoto: CircleImageView = itemView.findViewById(R.id.button_image)
+        var storyPhotoSeenLayout: RelativeLayout = itemView.findViewById(R.id.button_click_parent)
+        var whiteCard: CardView = itemView.findViewById(R.id.white_card)
 
 
     }

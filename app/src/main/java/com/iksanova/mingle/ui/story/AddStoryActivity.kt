@@ -29,7 +29,7 @@ class AddStoryActivity : BaseActivity() {
     private var myUrl = ""
     private lateinit var mStorageReference: StorageReference
     private lateinit var storageTask: StorageTask<*>
-    private val PICK_IMAGE_REQUEST = 1
+    private val pickImageRequest = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +42,7 @@ class AddStoryActivity : BaseActivity() {
         val intent = Intent()
         intent.action = Intent.ACTION_GET_CONTENT
         intent.type = "image/*"
-        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+        startActivityForResult(intent, pickImageRequest)
     }
 
     private fun getFileExtension(uri: Uri): String? {
@@ -72,8 +72,8 @@ class AddStoryActivity : BaseActivity() {
                     myUrl = downloadUri.toString()
 
                     val myid = FirebaseAuth.getInstance().currentUser!!.uid
-                    val storyId = FirebaseDatabase.getInstance().getReference().child("AllStories").child("StoryData").push().key
-                    val databaseReference = FirebaseDatabase.getInstance().getReference()
+                    val storyId = FirebaseDatabase.getInstance().reference.child("AllStories").child("StoryData").push().key
+                    val databaseReference = FirebaseDatabase.getInstance().reference
                         .child("Story").child(myid).child(storyId!!)
 
                     val timend = System.currentTimeMillis() + 86400000

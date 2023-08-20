@@ -3,20 +3,13 @@ package com.iksanova.mingle.ui.login
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
@@ -25,7 +18,6 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.iksanova.mingle.R
-import com.iksanova.mingle.base.BaseActivity
 import com.iksanova.mingle.models.UserModel
 import com.iksanova.mingle.ui.home.HomeActivity
 import com.iksanova.mingle.ui.location.LocationActivity
@@ -35,7 +27,7 @@ class JoinNowActivity : AppCompatActivity() {
     private lateinit var googleBtn: RelativeLayout
     private lateinit var auth: FirebaseAuth
     private lateinit var client: GoogleSignInClient
-    private val Rc_Sign_in = 1
+    private val RcSignIn = 1
     private val TAG = "JoinActivity"
     private lateinit var databaseReference: DatabaseReference
 
@@ -59,13 +51,13 @@ class JoinNowActivity : AppCompatActivity() {
 
     private fun googlesignIn() {
         val intent = client.signInIntent
-        startActivityForResult(intent, Rc_Sign_in)
+        startActivityForResult(intent, RcSignIn)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == Rc_Sign_in) {
+        if (requestCode == RcSignIn) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)

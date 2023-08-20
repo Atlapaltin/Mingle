@@ -27,14 +27,15 @@ import android.widget.TextView
 import com.google.firebase.database.DatabaseError
 import com.iksanova.mingle.constants.Constants
 import com.iksanova.mingle.utils.UniversalImageLoderClass
+import jp.shts.android.storiesprogressview.StoriesProgressView
 
 class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
     private var counter = 0
     private var presstime: Long = 0L
     private val limit: Long = 500L
     private lateinit var storiesProgressView: StoriesProgressView
-    private lateinit var story_photo: ImageView
-    private lateinit var story_username: TextView
+    private lateinit var storyPhoto: ImageView
+    private lateinit var storyUsername: TextView
     private lateinit var timetxt: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var user: FirebaseUser
@@ -78,8 +79,8 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
         user = FirebaseAuth.getInstance().currentUser!!
 
         imageView = findViewById(R.id.img)
-        story_photo = findViewById(R.id.storyimage)
-        story_username = findViewById(R.id.username)
+        storyPhoto = findViewById(R.id.storyimage)
+        storyUsername = findViewById(R.id.username)
         timetxt = findViewById(R.id.time)
 
         userid = intent.getStringExtra("userid")!!
@@ -101,14 +102,14 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
     }
 
     override fun onNext() {
-        UniversalImageLoderClass.setImage(images[++counter], story_photo, progressBar)
+        UniversalImageLoderClass.setImage(images[++counter], storyPhoto, progressBar)
         addView(storyids[counter])
     }
 
     override fun onPrev() {
         if ((counter - 1) < 0)
             return
-        UniversalImageLoderClass.setImage(images[--counter], story_photo, progressBar)
+        UniversalImageLoderClass.setImage(images[--counter], storyPhoto, progressBar)
     }
 
     override fun onComplete() {
@@ -154,7 +155,7 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
                 storiesProgressView.setStoriesListener(this@StoryActivity)
                 storiesProgressView.startStories(counter)
 
-                UniversalImageLoderClass.setImage(images[counter], story_photo, null)
+                UniversalImageLoderClass.setImage(images[counter], storyPhoto, null)
                 addView(storyids[counter])
             }
 
@@ -165,14 +166,14 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
     }
 
     private fun userInfo(userid: String) {
-        val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().getReference().child(Constants.USER_CONSTANT).child(userid)
+        val databaseReference: DatabaseReference = FirebaseDatabase.getInstance().reference.child(Constants.USER_CONSTANT).child(userid)
             .child(Constants.INFO)
         databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val username: String = snapshot.child("username").getValue(String::class.java)!!
                 val img: String = snapshot.child("imgurl").getValue(String::class.java)!!
                 UniversalImageLoderClass.setImage(img, imageView, null)
-                story_username.text = username
+                storyUsername.text = username
             }
 
             override fun onCancelled(error: DatabaseError) {
