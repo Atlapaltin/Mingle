@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "897428087711",
+    "project_id": "mingle-6ad36",
+    "storage_bucket": "mingle-6ad36.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:897428087711:android:b10a0a34f393e3f79713aa",
+        "android_client_info": {
+          "package_name": "com.iksanova.mingle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "897428087711-nkdnln3oerr03q5or19cp9kipa18qed9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxTd4LtttWuk78nJTIiSCSszuVErMQj5Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "897428087711-nkdnln3oerr03q5or19cp9kipa18qed9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
