@@ -22,6 +22,7 @@ import com.iksanova.mingle.constants.Constants.INFO
 import com.iksanova.mingle.ui.home.HomeActivity
 import com.iksanova.mingle.utils.AppSharedPreferences
 import com.iksanova.mingle.utils.LoadingDialog
+import com.theartofdev.edmodo.cropper.CropImage
 
 class SharePostActivity : BaseActivity() {
     private lateinit var editText: EditText
@@ -63,11 +64,9 @@ class SharePostActivity : BaseActivity() {
 
         // Select Image
         btnSelectImg.setOnClickListener { openFileChooser() }
-
         editText.requestFocus()
         editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 btnPost.setTextColor(Color.BLACK)
             }
@@ -81,7 +80,7 @@ class SharePostActivity : BaseActivity() {
                 loadingDialog.startLoadingDialog()
                 uploadFile(mImageUri!!)
             } else {
-                if (!editText.text.toString().isEmpty())
+                if (editText.text.toString().isNotEmpty())
                     loadingDialog.startLoadingDialog()
                 uploadData(editText.text.toString())
             }
@@ -89,13 +88,13 @@ class SharePostActivity : BaseActivity() {
     }
 
     private fun uploadData(description: String) {
-        val ref = FirebaseDatabase.getInstance().getReference().child("AllPosts")
+        val ref = FirebaseDatabase.getInstance().reference.child("AllPosts")
         val key = ref.push().key
-        val map: HashMap<String, Any> = HashMap()
+        val map: HashMap<String, Any?> = HashMap()
         map["description"] = description
         map["imgUrl"] = ""
-        map["username"] = appSharedPreferences.getUserName()
-        map["user_profile"] = appSharedPreferences.getImgUrl()
+        map["username"] = appSharedPreferences.userName
+        map["userProfile"] = appSharedPreferences.imgUrl
         map["key"] = key!!
         ref.child(key).child(INFO).setValue(map).addOnCompleteListener { task ->
             loadingDialog.dismissDialog()
@@ -136,31 +135,29 @@ class SharePostActivity : BaseActivity() {
     }
 
     private fun uploadFile(mImageUri: Uri) {
-        if (mImageUri != null) {
-            val reference = mStorageRef.child(user.uid).child("Files/" + System.currentTimeMillis())
-            reference.putFile(mImageUri)
-                .addOnSuccessListener { taskSnapshot ->
-                    reference.downloadUrl.addOnSuccessListener { uri ->
-                        val ref = FirebaseDatabase.getInstance().getReference().child("AllPosts")
-                        val key = ref.push().key
-                        val map: HashMap<String, Any> = HashMap()
-                        val imageUrl = uri.toString()
-                        map["imgUrl"] = imageUrl
-                        map["description"] = editText.text.toString()
-                        map["username"] = appSharedPreferences.getUserName()
-                        map["user_profile"] = appSharedPreferences.getImgUrl()
-                        map["key"] = key!!
-                        ref.child(key).child(INFO).setValue(map).addOnCompleteListener { task ->
-                            loadingDialog.dismissDialog()
-                            val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                        }
+        val reference = mStorageRef.child(user.uid).child("Files/" + System.currentTimeMillis())
+        reference.putFile(mImageUri)
+            .addOnSuccessListener { taskSnapshot ->
+                reference.downloadUrl.addOnSuccessListener { uri ->
+                    val ref = FirebaseDatabase.getInstance().reference.child("AllPosts")
+                    val key = ref.push().key
+                    val map: HashMap<String, Any?> = HashMap()
+                    val imageUrl = uri.toString()
+                    map["imgUrl"] = imageUrl
+                    map["description"] = editText.text.toString()
+                    map["username"] = appSharedPreferences.userName
+                    map["userProfile"] = appSharedPreferences.imgUrl
+                    map["key"] = key!!
+                    ref.child(key).child(INFO).setValue(map).addOnCompleteListener { task ->
+                        loadingDialog.dismissDialog()
+                        val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
                     }
                 }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this@SharePostActivity, e.message, Toast.LENGTH_SHORT).show()
-                }
-        }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this@SharePostActivity, e.message, Toast.LENGTH_SHORT).show()
+            }
     }
 }

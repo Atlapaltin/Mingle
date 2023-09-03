@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.view.Window
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -40,8 +42,8 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
     private lateinit var progressBar: ProgressBar
     private lateinit var user: FirebaseUser
 
-    private lateinit var images: List<String>
-    private lateinit var storyids: List<String>
+    private lateinit var images: MutableList<String>
+    private lateinit var storyids: MutableList<String>
 
     private lateinit var userid: String
     private lateinit var imageView: CircleImageView
@@ -56,7 +58,10 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
             MotionEvent.ACTION_UP -> {
                 val now = System.currentTimeMillis()
                 storiesProgressView.resume()
-                limit < now - presstime
+                if (limit < now - presstime) {
+                    view.performClick()
+                }
+                true
             }
             else -> false
         }
@@ -67,14 +72,23 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
         setContentView(R.layout.activity_story)
         val window: Window = this.window
 
-        // clear FLAG_TRANSLUCENT_STATUS flag:
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-
         // add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
 
-        // finally change the color
+// finally change the color
         window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+
+// set the status bar to be transparent
+        val controller = window.insetsController
+        if (controller != null) {
+            controller.setSystemBarsAppearance(
+                0,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            )
+            controller.hide(WindowInsets.Type.statusBars())
+        }
+
+
         storiesProgressView = findViewById(R.id.stories)
         user = FirebaseAuth.getInstance().currentUser!!
 
@@ -141,9 +155,9 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
                 storyids.clear()
                 for (snap in snapshot.children) {
                     val model: StoryModel = snap.getValue(StoryModel::class.java)!!
-                    val timecurrent: Long = System.currentTimeMillis()
+                    val timeCurrent: Long = System.currentTimeMillis()
 
-                    if (timecurrent > model.timeStart && timecurrent < model.timeEnd) {
+                    if (timeCurrent > model.timeStart && timeCurrent < model.timeEnd) {
                         images.add(model.storyImg)
                         storyids.add(model.storyId)
                         covertTimeToText(model.timeUpload, timetxt)

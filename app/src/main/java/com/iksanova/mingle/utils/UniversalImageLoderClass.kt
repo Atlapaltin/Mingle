@@ -40,7 +40,7 @@ class UniversalImageLoderClass(private val mContext: Context) {
     }
 
     companion object {
-        fun setImage(imgUrl: String, imageView: ImageView, mProgressBar: ProgressBar?) {
+        fun setImage(imgUrl: String?, imageView: ImageView, mProgressBar: ProgressBar?) {
             val imageLoader = ImageLoader.getInstance()
             imageLoader.displayImage(imgUrl, imageView, object : ImageLoadingListener {
                 override fun onLoadingStarted(imageUri: String?, view: View?) {

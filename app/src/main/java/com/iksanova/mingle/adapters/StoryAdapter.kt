@@ -104,7 +104,7 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
                 for (snap in snapshot.children) {
                     val storyModel = snap.getValue(StoryModel::class.java)
                     if (storyModel != null) {
-                        if (timeCurrent > storyModel.timeStart && timeCurrent < storyModel.timeEnd) {
+                        if ((timeCurrent > storyModel.timeStart) && (timeCurrent < storyModel.timeEnd)) {
                             count++
                         }
                     }

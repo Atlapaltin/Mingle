@@ -55,7 +55,7 @@ class HomeActivity : BaseActivity() {
         setContentView(R.layout.activity_home)
         appSharedPreferences = AppSharedPreferences(this)
         user = FirebaseAuth.getInstance().currentUser!!
-        userRef = FirebaseDatabase.getInstance().getReference().child(Constants.USER_CONSTANT).child(user.uid)
+        userRef = FirebaseDatabase.getInstance().reference.child(Constants.USER_CONSTANT).child(user.uid)
         drawerLayout = findViewById(R.id.drawerLayout)
         profileImg = findViewById(R.id.img)
         messageBtn = findViewById(R.id.messageBtn)
@@ -63,7 +63,7 @@ class HomeActivity : BaseActivity() {
 
         //UniversalImageLoaderClass
         val universalImageLoderClass = UniversalImageLoderClass(this)
-        ImageLoader.getInstance().init(universalImageLoderClass.config)
+        ImageLoader.getInstance().init(universalImageLoderClass.getConfig())
 
         // Header
         val header = mNavigationView.getHeaderView(0)
@@ -111,7 +111,7 @@ class HomeActivity : BaseActivity() {
         userRef.child("Info").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 model = snapshot.getValue(UserModel::class.java)!!
-                appSharedPreferences.username = model.username
+                appSharedPreferences.userName = model.username
                 appSharedPreferences.imgUrl = model.imageUrl
             }
 
@@ -138,6 +138,7 @@ class HomeActivity : BaseActivity() {
         true
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val mBottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation_bar)
         if (mBottomNavigationView.selectedItemId == R.id.nav_home) {

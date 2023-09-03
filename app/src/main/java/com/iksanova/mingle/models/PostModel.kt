@@ -5,5 +5,5 @@ class PostModel {
     var description: String? = null
     var key: String? = null
     var username: String? = null
-    var user_profile: String? = null
+    var userProfile: String? = null
 }

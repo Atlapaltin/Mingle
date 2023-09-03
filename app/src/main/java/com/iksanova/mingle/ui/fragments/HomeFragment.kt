@@ -1,5 +1,6 @@
 package com.iksanova.mingle.ui.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +25,7 @@ import com.iksanova.mingle.constants.Constants.USER_CONSTANT
 import com.iksanova.mingle.models.PostModel
 import com.iksanova.mingle.models.StoryModel
 import com.iksanova.mingle.models.UserModel
+import com.todkars.shimmer.ShimmerRecyclerView
 
 class HomeFragment : Fragment() {
     private lateinit var user: FirebaseUser
@@ -112,6 +114,7 @@ class HomeFragment : Fragment() {
     //-----------------------------Read Story------------------------//
     private fun readStory() {
         ref.child(STORY).addValueEventListener(object : ValueEventListener {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 val timeCurrent = System.currentTimeMillis()
                 storyModelList.clear()

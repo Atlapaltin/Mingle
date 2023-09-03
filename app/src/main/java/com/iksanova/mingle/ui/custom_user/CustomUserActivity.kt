@@ -1,8 +1,7 @@
 package com.iksanova.mingle.ui.custom_user
 
-import android.content.Intent
+import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -21,18 +20,21 @@ import de.hdodenhof.circleimageview.CircleImageView
 
 class CustomUserActivity : BaseActivity() {
     private lateinit var profileImg: CircleImageView
-    private lateinit var txt_name: TextView
-    private lateinit var txt_title: TextView
-    private lateinit var txt_location: TextView
-    private lateinit var item_search_input: TextView
-    private lateinit var user_email: TextView
-    private lateinit var profile_link: TextView
+    private lateinit var txtName: TextView
+    private lateinit var txtTitle: TextView
+    private lateinit var txtLocation: TextView
+    private lateinit var itemSearchInput: TextView
+    private lateinit var userEmail: TextView
+    private lateinit var profileLink: TextView
     private lateinit var connectBtn: CardView
     private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
     private lateinit var user: FirebaseUser
     private lateinit var backBtn: ImageView
 
+
+
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_custom_user)
@@ -43,37 +45,37 @@ class CustomUserActivity : BaseActivity() {
         // Get Data From Adapter
         val userModel = intent.getParcelableExtra<UserModel>("user_data")
 
-        txt_name = findViewById(R.id.txt_name)
-        txt_title = findViewById(R.id.txt_headline)
-        txt_location = findViewById(R.id.txt_location)
+        txtName = findViewById(R.id.txt_name)
+        txtTitle = findViewById(R.id.txt_headline)
+        txtLocation = findViewById(R.id.txt_location)
         profileImg = findViewById(R.id.profileImg)
-        item_search_input = findViewById(R.id.item_search_input)
+        itemSearchInput = findViewById(R.id.item_search_input)
         connectBtn = findViewById(R.id.connectBtn)
-        user_email = findViewById(R.id.user_email)
+        userEmail = findViewById(R.id.user_email)
         backBtn = findViewById(R.id.btn_back)
-        profile_link = findViewById(R.id.profile_link)
+        profileLink = findViewById(R.id.profile_link)
 
         // Back Button
         backBtn.setOnClickListener { finish() }
 
         //Set Values
         if (userModel != null) {
-            item_search_input.text = userModel.username
+            itemSearchInput.text = userModel.username
         }
         if (userModel != null) {
-            txt_name.text = userModel.username
+            txtName.text = userModel.username
         }
         if (userModel != null) {
-            txt_location.text = userModel.location
+            txtLocation.text = userModel.location
         }
         if (userModel != null) {
-            user_email.text = userModel.emailAddress
+            userEmail.text = userModel.emailAddress
         }
         if (userModel != null) {
-            txt_title.text = userModel.headline
+            txtTitle.text = userModel.headline
         }
         if (userModel != null) {
-            profile_link.text = "https://www.linkedin.com/in/${userModel.username}-a785i1b7/"
+            profileLink.text = "https://www.linkedin.com/in/${userModel.username}-a785i1b7/"
         }
         if (userModel != null) {
             Glide.with(this).load(userModel.imageUrl).into(profileImg)
@@ -87,5 +89,7 @@ class CustomUserActivity : BaseActivity() {
             connectBtn.setCardBackgroundColor(ContextCompat.getColor(this, R.color.gray))
             connectBtn.isEnabled = false
         }
+
+
     }
 }

@@ -24,7 +24,7 @@ class UserModel(
         parcel.readString(),
         parcel.readString()
     )
-
+    constructor() : this("", "", "", "", "", "", "", "")
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(username)
         parcel.writeString(emailAddress)

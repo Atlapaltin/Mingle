@@ -27,8 +27,8 @@ class JoinNowActivity : AppCompatActivity() {
     private lateinit var googleBtn: RelativeLayout
     private lateinit var auth: FirebaseAuth
     private lateinit var client: GoogleSignInClient
-    private val RcSignIn = 1
-    private val TAG = "JoinActivity"
+    private val rcSignIn = 1
+    private val tag = "JoinActivity"
     private lateinit var databaseReference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,8 +37,8 @@ class JoinNowActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         googleBtn = findViewById(R.id.card_google_btn)
-        googleBtn.setOnClickListener { googlesignIn() }
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("Users")
+        googleBtn.setOnClickListener { googleSignIn() }
+        databaseReference = FirebaseDatabase.getInstance().reference.child("Users")
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
@@ -49,15 +49,16 @@ class JoinNowActivity : AppCompatActivity() {
         client = GoogleSignIn.getClient(this, gso)
     }
 
-    private fun googlesignIn() {
+    private fun googleSignIn() {
         val intent = client.signInIntent
-        startActivityForResult(intent, RcSignIn)
+        startActivityForResult(intent, rcSignIn)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == RcSignIn) {
+        if (requestCode == rcSignIn) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)
@@ -89,11 +90,16 @@ class JoinNowActivity : AppCompatActivity() {
                             if (dataSnapshot.hasChild(auth.currentUser!!.uid)) {
                                 startActivity(Intent(this@JoinNowActivity, HomeActivity::class.java))
                             } else {
-                                val model = UserModel()
-                                model.emailAddress = emailAddress
-                                model.imageUrl = finalImageUrl
-                                model.username = username
-                                model.key = auth.currentUser!!.uid
+                                val model = UserModel(
+                                    emailAddress = emailAddress,
+                                    imageUrl = finalImageUrl,
+                                    username = username,
+                                    key = auth.currentUser!!.uid,
+                                    token = null,
+                                    location = null,
+                                    headline = null,
+                                    about = null,
+                                )
                                 databaseReference.child(auth.currentUser!!.uid).child("Info")
                                     .setValue(model)
                                     .addOnCompleteListener { startActivity(Intent(this@JoinNowActivity, LocationActivity::class.java)) }
@@ -103,7 +109,7 @@ class JoinNowActivity : AppCompatActivity() {
                         override fun onCancelled(databaseError: DatabaseError) {}
                     })
                 } else {
-                    Log.w(TAG, "signInWithCustomToken:failure", task.exception)
+                    Log.w(tag, "signInWithCustomToken:failure", task.exception)
                 }
             }
     }

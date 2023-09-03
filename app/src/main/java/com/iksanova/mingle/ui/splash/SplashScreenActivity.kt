@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.iksanova.mingle.R
 import com.iksanova.mingle.base.BaseActivity
 import com.iksanova.mingle.ui.login.LoginActivity
+import androidx.appcompat.app.AppCompatActivity
 
 class SplashScreenActivity : AppCompatActivity() {
     private lateinit var mHandler: Handler

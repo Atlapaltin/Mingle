@@ -1,18 +1,13 @@
 package com.iksanova.mingle.ui.story
 
 import android.app.ProgressDialog
-import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import com.google.android.gms.tasks.Continuation
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -23,6 +18,7 @@ import com.iksanova.mingle.constants.Constants
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.theartofdev.edmodo.cropper.CropImage
 
 class AddStoryActivity : BaseActivity() {
     private lateinit var mImageUri: Uri
@@ -56,12 +52,11 @@ class AddStoryActivity : BaseActivity() {
         progressDialog.setMessage("Posting")
         progressDialog.show()
 
-        if (mImageUri != null) {
-            val imageReference = mStorageReference.child(System.currentTimeMillis().toString() + "." +
-                    getFileExtension(mImageUri))
+        val imageReference = mStorageReference.child(System.currentTimeMillis().toString() + "." +
+                getFileExtension(mImageUri))
 
-            storageTask = imageReference.putFile(mImageUri)
-            storageTask.continueWithTask(Continuation { task ->
+        storageTask = imageReference.putFile(mImageUri).apply {
+            continueWithTask(Continuation { task ->
                 if (!task.isSuccessful) {
                     throw task.exception!!
                 }
@@ -71,22 +66,24 @@ class AddStoryActivity : BaseActivity() {
                     val downloadUri = task.result
                     myUrl = downloadUri.toString()
 
-                    val myid = FirebaseAuth.getInstance().currentUser!!.uid
-                    val storyId = FirebaseDatabase.getInstance().reference.child("AllStories").child("StoryData").push().key
+                    val myId = FirebaseAuth.getInstance().currentUser!!.uid
+                    val storyId =
+                        FirebaseDatabase.getInstance().reference.child("AllStories")
+                            .child("StoryData").push().key
                     val databaseReference = FirebaseDatabase.getInstance().reference
-                        .child("Story").child(myid).child(storyId!!)
+                        .child("Story").child(myId).child(storyId!!)
 
-                    val timend = System.currentTimeMillis() + 86400000
-                    val timestart = System.currentTimeMillis() / 1000
+                    val timeFinish = System.currentTimeMillis() + 86400000
+                    val timeStart = System.currentTimeMillis() / 1000
 
                     val hashMap = HashMap<String, Any>()
                     val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                     val date = Date()
                     hashMap["storyImg"] = myUrl
-                    hashMap["timestart"] = timestart
-                    hashMap["timeEnd"] = timend
+                    hashMap["timestart"] = timeStart
+                    hashMap["timeEnd"] = timeFinish
                     hashMap["storyId"] = storyId
-                    hashMap["userId"] = myid
+                    hashMap["userId"] = myId
                     hashMap["timeUpload"] = sdf.format(date)
                     databaseReference.setValue(hashMap).addOnCompleteListener { task ->
                         progressDialog.dismiss()
@@ -98,15 +95,14 @@ class AddStoryActivity : BaseActivity() {
             }.addOnFailureListener { e ->
                 Toast.makeText(this@AddStoryActivity, e.message, Toast.LENGTH_SHORT).show()
             }
-        } else {
-            Toast.makeText(this@AddStoryActivity, "Image not Selected", Toast.LENGTH_SHORT).show()
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
+        if (requestCode == pickImageRequest && resultCode == RESULT_OK
             && data != null) {
             mImageUri = data.data!!
             CropImage.activity(mImageUri)

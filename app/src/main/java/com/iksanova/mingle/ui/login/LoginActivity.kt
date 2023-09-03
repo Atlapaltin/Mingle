@@ -5,7 +5,6 @@ import android.content.IntentSender
 import android.os.Bundle
 import android.text.Html
 import android.util.Log
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -13,13 +12,8 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.identity.SignInCredential
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
@@ -43,8 +37,8 @@ class LoginActivity : BaseActivity(), ServiceListener {
     private lateinit var appDescriptionSliderAdapter: AppDescriptionSliderAdapter
     private lateinit var dots: Array<TextView>
     private lateinit var oneTapClient: SignInClient
-    private val REQ_ONE_TAP = 1
-    private val TAG = "LoginActivity"
+    private val reqOneTAP = 1
+    private val tag = "LoginActivity"
     private lateinit var btnSignIn: TextView
     private lateinit var auth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
@@ -69,7 +63,7 @@ class LoginActivity : BaseActivity(), ServiceListener {
         btnSignIn.setOnClickListener { startActivity(Intent(this@LoginActivity, JoinNowActivity::class.java)) }
 
         //Function
-        OneTapLogin()
+        oneTapLogin()
     }
 
     private fun addDots(position: Int) {
@@ -96,7 +90,7 @@ class LoginActivity : BaseActivity(), ServiceListener {
         override fun onPageScrollStateChanged(state: Int) {}
     }
 
-    private fun OneTapLogin() {
+    private fun oneTapLogin() {
         oneTapClient = Identity.getSignInClient(this)
         val signInRequest = BeginSignInRequest.builder()
             .setPasswordRequestOptions(
@@ -120,21 +114,22 @@ class LoginActivity : BaseActivity(), ServiceListener {
             .addOnSuccessListener(this) { result ->
                 try {
                     startIntentSenderForResult(
-                        result.pendingIntent.intentSender, REQ_ONE_TAP,
+                        result.pendingIntent.intentSender, reqOneTAP,
                         null, 0, 0, 0
                     )
                 } catch (e: IntentSender.SendIntentException) {
-                    Log.e(TAG, "Couldn't start One Tap UI: " + e.localizedMessage)
+                    Log.e(tag, "Couldn't start One Tap UI: " + e.localizedMessage)
                 }
             }
             .addOnFailureListener(this) { e ->
-                e.localizedMessage?.let { Log.d(TAG, it) }
+                e.localizedMessage?.let { Log.d(tag, it) }
             }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQ_ONE_TAP) {
+        if (requestCode == reqOneTAP) {
             try {
                 val credential = oneTapClient.getSignInCredentialFromIntent(data)
                 val idToken = credential.googleIdToken
@@ -147,20 +142,20 @@ class LoginActivity : BaseActivity(), ServiceListener {
                 if (idToken != null) {
                     // Got an ID token from Google. Use it to authenticate
                     // with your backend.
-                    Log.d(TAG, "Got ID token.")
+                    Log.d(tag, "Got ID token.")
                 }
             } catch (e: ApiException) {
                 when (e.statusCode) {
                     CommonStatusCodes.CANCELED -> {
-                        Log.d(TAG, "One-tap dialog was closed.")
+                        Log.d(tag, "One-tap dialog was closed.")
                         // Don't re-prompt the user.
                     }
                     CommonStatusCodes.NETWORK_ERROR -> {
-                        Log.d(TAG, "One-tap encountered a network error.")
+                        Log.d(tag, "One-tap encountered a network error.")
                         // Try again or just ignore.
                     }
                     else -> {
-                        Log.d(TAG, "Couldn't get credential from result." + e.localizedMessage)
+                        Log.d(tag, "Couldn't get credential from result." + e.localizedMessage)
                     }
                 }
             }
@@ -168,21 +163,31 @@ class LoginActivity : BaseActivity(), ServiceListener {
     }
 
     private fun firebaseAuthWithGoogle(idToken: String?, username: String?, emailAddress: String?, finalImageUrl: String?) {
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("Users")
+        databaseReference = FirebaseDatabase.getInstance().reference.child("Users")
         val authCredential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(authCredential).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         if (!dataSnapshot.hasChild(auth.currentUser!!.uid)) {
-                            val model = UserModel()
-                            model.emailAddress = emailAddress
-                            model.imageUrl = finalImageUrl
-                            model.username = username
-                            model.key = auth.currentUser!!.uid
+                            val model = UserModel(
+                                emailAddress = emailAddress,
+                                imageUrl = finalImageUrl,
+                                username = username,
+                                key = auth.currentUser!!.uid,
+                                token = null,
+                                location = null,
+                                headline = null,
+                                about = null,
+                            )
                             databaseReference.child(auth.currentUser!!.uid).child(Constants.INFO)
                                 .setValue(model)
-                                .addOnCompleteListener { startActivity(Intent(this@LoginActivity, LocationActivity::class.java)); finish() }
+                                .addOnCompleteListener {
+                                    startActivity(
+                                        Intent(this@LoginActivity,
+                                            LocationActivity::class.java));
+                                    finish()
+                                }
                         } else {
                             startActivity(Intent(this@LoginActivity, HomeActivity::class.java)); finish()
                         }
@@ -192,7 +197,7 @@ class LoginActivity : BaseActivity(), ServiceListener {
                 })
             } else {
                 // If sign in fails, display a message to the user.
-                Log.w(TAG, "signInWithCustomToken:failure", task.exception)
+                Log.w(tag, "signInWithCustomToken:failure", task.exception)
             }
         }
     }

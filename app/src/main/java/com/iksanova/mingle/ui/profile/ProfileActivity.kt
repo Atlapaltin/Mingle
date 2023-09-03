@@ -71,6 +71,7 @@ class ProfileActivity : BaseActivity() {
 
         //Get Data from Firebase
         userRef.addValueEventListener(object : ValueEventListener {
+            @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
                 model = snapshot.child(INFO).getValue(UserModel::class.java)!!
                 name.text = model.username

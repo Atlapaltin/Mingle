@@ -21,11 +21,8 @@ import com.iksanova.mingle.models.PostModel
 import com.iksanova.mingle.utils.AppSharedPreferences
 import com.github.pgreze.reactions.PopupGravity
 import com.github.pgreze.reactions.ReactionPopup
-import com.github.pgreze.reactions.ReactionsConfig
 import com.github.pgreze.reactions.ReactionsConfigBuilder
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -36,6 +33,8 @@ import de.hdodenhof.circleimageview.CircleImageView
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.luseen.autolinklibrary.AutoLinkMode
+import com.luseen.autolinklibrary.AutoLinkTextView
 
 class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) : RecyclerView.Adapter<PostAdapter.MyViewHolder>() {
     private val strings = arrayOf("Like", "Celebrate", "Support", "Love", "Insightful", "Idea")
@@ -57,7 +56,7 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
 
             override fun onSingleTapUp(e: MotionEvent): Boolean {
                 list[position].key?.let { addLike(user!!.uid, it, ref, holder) }
-                holder.like_clr.setTextColor(ContextCompat.getColor(aCtx, R.color.main_color))
+                holder.likeClr.setTextColor(ContextCompat.getColor(aCtx, R.color.main_color))
                 return super.onSingleTapUp(e)
             }
 
@@ -76,41 +75,82 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
                     .withTextBackground(ColorDrawable(Color.WHITE))
                     .withTextColor(Color.BLACK)
                     .withPopupGravity(PopupGravity.PARENT_RIGHT)
-                    .withTextSize(aCtx.resources.getDimension(R.dimen.reactions_text_size))
+                    .withTextSize(aCtx.resources.getDimension(R.dimen.reactions_textSize))
                     .build()
 
-                val popup = ReactionPopup(aCtx, config) { position: Int ->
-                    // true is closing popup, false is requesting a new selection
-                    true
-                }
+                val popup = ReactionPopup(
+                    context = aCtx,
+                    reactionsConfig = config,
+                    reactionSelectedListener = { position: Int ->
+                        when (position) {
+                            0 -> holder.icLike.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    aCtx,
+                                    R.drawable.ic_link_like
+                                )
+                            )
 
-                popup.setReactionSelectedListener { position: Int ->
-                    when (position) {
-                        0 -> holder.ic_like.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_like))
-                        1 -> holder.ic_like.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_celebrate))
-                        2 -> holder.ic_like.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_care))
-                        3 -> holder.ic_like.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_love))
-                        4 -> holder.ic_like.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_idea))
-                        else -> holder.ic_like.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_curious))
+                            1 -> holder.icLike.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    aCtx,
+                                    R.drawable.ic_link_celebrate
+                                )
+                            )
+
+                            2 -> holder.icLike.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    aCtx,
+                                    R.drawable.ic_link_care
+                                )
+                            )
+
+                            3 -> holder.icLike.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    aCtx,
+                                    R.drawable.ic_link_love
+                                )
+                            )
+
+                            4 -> holder.icLike.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    aCtx,
+                                    R.drawable.ic_link_idea
+                                )
+                            )
+
+                            else -> holder.icLike.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    aCtx,
+                                    R.drawable.ic_link_curious
+                                )
+                            )
+                        }
+                        // Close selector if not invalid item (testing purpose)
+                        position != 3
+                    }, reactionPopupStateChangeListener = {
+                        // true is closing popup, false is requesting a new selection
                     }
-                    // Close selector if not invalid item (testing purpose)
-                    position != 3
-                }
+                )
+
                 list[position].key?.let { addLike(user!!.uid, it, ref, holder) }
-                holder.btn_like.setOnTouchListener(popup)
+                holder.buttonLike.setOnTouchListener(popup)
                 super.onLongPress(e)
             }
         })
 
-        holder.btn_like.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
+        holder.buttonLike.setOnTouchListener { view, motionEvent ->
             gestureDetector.onTouchEvent(motionEvent)
-        })
+            if (motionEvent.action == MotionEvent.ACTION_UP && !view.hasOnClickListeners()) {
+                view.performClick()
+            }
+            return@setOnTouchListener true
+        }
 
         holder.desc.addAutoLinkMode(AutoLinkMode.MODE_HASHTAG)
         holder.desc.setHashtagModeColor(aCtx.resources.getColor(R.color.main_color))
         holder.desc.setAutoLinkText(list[position].description)
 
-        Glide.with(aCtx).load(list[position].user_profile).into(holder.userImage)
+        Glide.with(aCtx).load(list[position].userProfile).into(holder.userImage)
         holder.userName.text = list[position].username
 
         if (list[position].imgUrl == "") {
@@ -125,12 +165,12 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
 
         val likeRef =
             postKey?.let { FirebaseDatabase.getInstance().reference.child(ALL_POSTS).child(it).child("Likes") }
-        likeRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        likeRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 for (snapshot1 in snapshot.children) {
                     if (snapshot1.key == userKey) {
-                        holder.ic_like.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_like))
-                        holder.like_clr.setTextColor(ContextCompat.getColor(aCtx, R.color.main_color))
+                        holder.icLike.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_like))
+                        holder.likeClr.setTextColor(ContextCompat.getColor(aCtx, R.color.main_color))
                     }
                 }
             }
@@ -149,6 +189,7 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
             .child(postkey)
 
         databaseReference.addValueEventListener(object : ValueEventListener {
+            @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
                 textView.text = snapshot.child("Likes").childrenCount.toString()
                 commentcount.text = snapshot.child("Comments").childrenCount.toString() + " comments"
@@ -162,12 +203,12 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
         val ref = ref.child(ALL_POSTS).child(key).child("Likes")
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val date = Date()
-        val map: MutableMap<String, Any> = HashMap()
+        val map: MutableMap<String, Any?> = HashMap()
         map["time"] = sdf.format(date)
         map["username"] = appSharedPreferences.getUserName()
         map["imgUrl"] = appSharedPreferences.getImgUrl()
         ref.child(uid).setValue(map).addOnSuccessListener {
-            holder.ic_like.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_like))
+            holder.icLike.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_like))
         }
     }
 
@@ -178,14 +219,14 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
     inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var desc: AutoLinkTextView = itemView.findViewById(R.id.text_1)
         var postImage: ImageView = itemView.findViewById(R.id.post_img)
-        var btn_like: LinearLayout = itemView.findViewById(R.id.btn_like)
+        var buttonLike: LinearLayout = itemView.findViewById(R.id.btn_like)
         var ll: CardView = itemView.findViewById(R.id.ll)
-        var ic_like: ImageView = itemView.findViewById(R.id.ic_like)
+        var icLike: ImageView = itemView.findViewById(R.id.ic_like)
         var userImage: CircleImageView = itemView.findViewById(R.id.button_image)
         var userName: TextView = itemView.findViewById(R.id.username)
         var likesTxt: TextView = itemView.findViewById(R.id.likesTxt)
         var commentTxt: TextView = itemView.findViewById(R.id.commentTxt)
-        var like_clr: TextView = itemView.findViewById(R.id.like_clr)
+        var likeClr: TextView = itemView.findViewById(R.id.like_clr)
     }
 
     override fun getItemId(position: Int): Long {
