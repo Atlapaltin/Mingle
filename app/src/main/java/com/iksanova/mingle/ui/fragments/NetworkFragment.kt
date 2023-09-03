@@ -1,5 +1,6 @@
 package com.iksanova.mingle.ui.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -85,6 +86,7 @@ class NetworkFragment : Fragment() {
     //----------------------------------Read Request--------------------------------//
     private fun readRequest() {
         ref.child(USER_CONSTANT).addListenerForSingleValueEvent(object : ValueEventListener {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 list.clear()
                 for (id in requestList) {
@@ -106,6 +108,7 @@ class NetworkFragment : Fragment() {
     private fun readUsers() {
         connectionList = mutableListOf()
         ref.child(USER_CONSTANT).addListenerForSingleValueEvent(object : ValueEventListener {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 connectionList.clear()
                 for (dataSnapshot in snapshot.children) {

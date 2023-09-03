@@ -30,7 +30,7 @@ import com.iksanova.mingle.ui.message_user.MessageUsersActivity
 import com.iksanova.mingle.ui.profile.ProfileActivity
 import com.iksanova.mingle.ui.share_post.SharePostActivity
 import com.iksanova.mingle.utils.AppSharedPreferences
-import com.iksanova.mingle.utils.UniversalImageLoderClass
+import com.iksanova.mingle.utils.UniversalImageLoaderClass
 import com.nostra13.universalimageloader.core.ImageLoader
 
 class HomeActivity : BaseActivity() {
@@ -62,8 +62,8 @@ class HomeActivity : BaseActivity() {
         mNavigationView = findViewById(R.id.nav_view)
 
         //UniversalImageLoaderClass
-        val universalImageLoderClass = UniversalImageLoderClass(this)
-        ImageLoader.getInstance().init(universalImageLoderClass.getConfig())
+        val universalImageLoaderClass = UniversalImageLoaderClass(this)
+        ImageLoader.getInstance().init(universalImageLoaderClass.getConfig())
 
         // Header
         val header = mNavigationView.getHeaderView(0)

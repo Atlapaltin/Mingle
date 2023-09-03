@@ -21,7 +21,7 @@ import com.iksanova.mingle.R
 import com.iksanova.mingle.models.StoryModel
 import com.iksanova.mingle.ui.story.AddStoryActivity
 import com.iksanova.mingle.ui.story.StoryActivity
-import com.iksanova.mingle.utils.UniversalImageLoderClass
+import com.iksanova.mingle.utils.UniversalImageLoaderClass
 import de.hdodenhof.circleimageview.CircleImageView
 
 class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>) : RecyclerView.Adapter<StoryAdapter.MyViewHolder>() {
@@ -78,12 +78,12 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
                 val name = snapshot.child("username").getValue(String::class.java)
                 val img = snapshot.child("imageUrl").getValue(String::class.java)
                 if (img != null) {
-                    UniversalImageLoderClass.setImage(img, holder.storyPhoto, null)
+                    UniversalImageLoaderClass.setImage(img, holder.storyPhoto, null)
                 }
 
                 if (position != 0) {
                     if (img != null) {
-                        UniversalImageLoderClass.setImage(img, holder.storyPhoto, null)
+                        UniversalImageLoaderClass.setImage(img, holder.storyPhoto, null)
                     }
                     holder.storyUsername.text = name
                 }

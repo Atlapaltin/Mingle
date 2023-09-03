@@ -111,6 +111,7 @@ class SharePostActivity : BaseActivity() {
         startActivityForResult(intent, pickImageRequest)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -137,7 +138,7 @@ class SharePostActivity : BaseActivity() {
     private fun uploadFile(mImageUri: Uri) {
         val reference = mStorageRef.child(user.uid).child("Files/" + System.currentTimeMillis())
         reference.putFile(mImageUri)
-            .addOnSuccessListener { taskSnapshot ->
+            .addOnSuccessListener {
                 reference.downloadUrl.addOnSuccessListener { uri ->
                     val ref = FirebaseDatabase.getInstance().reference.child("AllPosts")
                     val key = ref.push().key
@@ -148,7 +149,7 @@ class SharePostActivity : BaseActivity() {
                     map["username"] = appSharedPreferences.userName
                     map["userProfile"] = appSharedPreferences.imgUrl
                     map["key"] = key!!
-                    ref.child(key).child(INFO).setValue(map).addOnCompleteListener { task ->
+                    ref.child(key).child(INFO).setValue(map).addOnCompleteListener {
                         loadingDialog.dismissDialog()
                         val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

@@ -28,6 +28,7 @@ class SplashScreenActivity : AppCompatActivity() {
         mHandler.postDelayed(mRunnable, 1000)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val intent = Intent(Intent.ACTION_MAIN)
         intent.addCategory(Intent.CATEGORY_HOME)

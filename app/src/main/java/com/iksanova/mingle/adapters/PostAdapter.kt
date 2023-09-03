@@ -49,7 +49,7 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
         val user = FirebaseAuth.getInstance().currentUser
         val ref = FirebaseDatabase.getInstance().reference
 
-        val gestureDetector: GestureDetector = GestureDetector(aCtx, object : GestureDetector.SimpleOnGestureListener() {
+        val gestureDetector = GestureDetector(aCtx, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDown(e: MotionEvent): Boolean {
                 return true
             }
@@ -183,16 +183,16 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
         }
     }
 
-    private fun isLikes(textView: TextView, commentcount: TextView, postkey: String) {
+    private fun isLikes(textView: TextView, commentCount: TextView, postKey: String) {
         val databaseReference = FirebaseDatabase.getInstance().reference
             .child(ALL_POSTS)
-            .child(postkey)
+            .child(postKey)
 
         databaseReference.addValueEventListener(object : ValueEventListener {
             @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
                 textView.text = snapshot.child("Likes").childrenCount.toString()
-                commentcount.text = snapshot.child("Comments").childrenCount.toString() + " comments"
+                commentCount.text = snapshot.child("Comments").childrenCount.toString() + " comments"
             }
 
             override fun onCancelled(error: DatabaseError) {}

@@ -1,5 +1,6 @@
 package com.iksanova.mingle.ui.message_user
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -42,6 +43,7 @@ class MessageUsersActivity : BaseActivity() {
     //----------------------------------Read Users--------------------------------//
     private fun readUsers() {
         ref.child(Constants.USER_CONSTANT).addValueEventListener(object : ValueEventListener {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 list.clear()
                 for (dataSnapshot in snapshot.children) {

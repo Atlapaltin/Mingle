@@ -29,7 +29,7 @@ class LocationActivity : BaseActivity() {
         editHeadline = findViewById(R.id.edit_headline)
         continueBtn = findViewById(R.id.continue_btn)
         auth = FirebaseAuth.getInstance()
-        ref = FirebaseDatabase.getInstance().getReference().child(Constants.USER_CONSTANT)
+        ref = FirebaseDatabase.getInstance().reference.child(Constants.USER_CONSTANT)
 
         // Continue Button
         continueBtn.setOnClickListener {
@@ -38,7 +38,7 @@ class LocationActivity : BaseActivity() {
             map["headline"] = editHeadline.text.toString()
 
             ref.child(auth.currentUser!!.uid).child(Constants.INFO).updateChildren(map)
-                .addOnCompleteListener { task ->
+                .addOnCompleteListener {
                     startActivity(Intent(this@LocationActivity, HomeActivity::class.java))
                     finish()
                 }

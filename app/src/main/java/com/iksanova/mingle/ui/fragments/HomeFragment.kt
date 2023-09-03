@@ -74,6 +74,7 @@ class HomeFragment : Fragment() {
     private fun readPosts() {
         recyclerView.hideShimmer()
         ref.child(ALL_POSTS).addListenerForSingleValueEvent(object : ValueEventListener {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
                 list.clear()
                 for (dataSnapshot in snapshot.children) {

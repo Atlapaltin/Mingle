@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
 import android.widget.TextView
 import com.google.firebase.database.DatabaseError
 import com.iksanova.mingle.constants.Constants
-import com.iksanova.mingle.utils.UniversalImageLoderClass
+import com.iksanova.mingle.utils.UniversalImageLoaderClass
 import jp.shts.android.storiesprogressview.StoriesProgressView
 
 class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
@@ -116,14 +116,14 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
     }
 
     override fun onNext() {
-        UniversalImageLoderClass.setImage(images[++counter], storyPhoto, progressBar)
+        UniversalImageLoaderClass.setImage(images[++counter], storyPhoto, progressBar)
         addView(storyids[counter])
     }
 
     override fun onPrev() {
         if ((counter - 1) < 0)
             return
-        UniversalImageLoderClass.setImage(images[--counter], storyPhoto, progressBar)
+        UniversalImageLoaderClass.setImage(images[--counter], storyPhoto, progressBar)
     }
 
     override fun onComplete() {
@@ -169,7 +169,7 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
                 storiesProgressView.setStoriesListener(this@StoryActivity)
                 storiesProgressView.startStories(counter)
 
-                UniversalImageLoderClass.setImage(images[counter], storyPhoto, null)
+                UniversalImageLoaderClass.setImage(images[counter], storyPhoto, null)
                 addView(storyids[counter])
             }
 
@@ -186,7 +186,7 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val username: String = snapshot.child("username").getValue(String::class.java)!!
                 val img: String = snapshot.child("imgurl").getValue(String::class.java)!!
-                UniversalImageLoderClass.setImage(img, imageView, null)
+                UniversalImageLoaderClass.setImage(img, imageView, null)
                 storyUsername.text = username
             }
 
@@ -196,14 +196,14 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
         })
     }
 
-    private fun addView(storyid: String) {
+    private fun addView(storyId: String) {
         if (userid != FirebaseAuth.getInstance().currentUser!!.uid) {
-            FirebaseDatabase.getInstance().reference.child("Story").child(userid).child(storyid)
+            FirebaseDatabase.getInstance().reference.child("Story").child(userid).child(storyId)
                 .child("views").child(FirebaseAuth.getInstance().currentUser!!.uid).setValue(true)
         }
     }
 
-    private fun covertTimeToText(dataDate: String, timetxt: TextView): String? {
+    private fun covertTimeToText(dataDate: String, timeTxt: TextView): String? {
         var convTime: String? = null
         try {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
@@ -219,7 +219,7 @@ class StoryActivity : BaseActivity(), StoriesProgressView.StoriesListener {
                 hour < 24 -> "$hour h "
                 else -> ""
             }
-            timetxt.text = convTime
+            timeTxt.text = convTime
         } catch (e: ParseException) {
             e.printStackTrace()
         }

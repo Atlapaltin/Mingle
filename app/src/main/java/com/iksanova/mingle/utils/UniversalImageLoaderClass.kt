@@ -15,7 +15,7 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener
 
-class UniversalImageLoderClass(private val mContext: Context) {
+class UniversalImageLoaderClass(private val mContext: Context) {
 
     private val defaultImage = R.color.gray
 
