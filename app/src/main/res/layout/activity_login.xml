@@ -6,17 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.login.LoginActivity">
 
-    <ImageView
-        android:id="@+id/img"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_margin="@dimen/_10sdp"
-        android:src="@drawable/login_logo"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/main_color"
-        tools:ignore="ContentDescription" />
-
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"
@@ -26,8 +15,7 @@
         android:padding="@dimen/_5sdp"
         app:layout_constraintBottom_toTopOf="@id/layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/img" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 
     <LinearLayout
@@ -81,7 +69,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:layout_centerVertical="true"
                     android:gravity="center"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"

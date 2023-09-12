@@ -69,7 +69,7 @@ class JoinNowActivity : AppCompatActivity() {
 
                 firebaseAuthWithGoogle(account.idToken, username, email, imageUrl)
             } catch (e: ApiException) {
-                Toast.makeText(this, "Signin Error", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Sign in Error", Toast.LENGTH_LONG).show()
                 Log.w("Error", "Google sign in failed", e)
             }
         }

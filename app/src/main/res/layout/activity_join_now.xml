@@ -30,15 +30,6 @@
                 android:layout_marginEnd="10dp"
                 android:gravity="start">
 
-                <ImageView
-                    android:id="@+id/btn_back"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/login_logo"
-                    app:tint="@color/main_color" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -183,7 +174,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="Or"
+                android:text="Или"
                 android:textColor="@color/gray"
                 android:textSize="@dimen/_16ssp" />
 
@@ -208,7 +199,9 @@
                 android:layout_height="21dp"
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@id/button_text2"
-                android:src="@drawable/google" />
+                android:src="@drawable/google"
+                tools:ignore="ContentDescription"
+                />
 
 
             <TextView

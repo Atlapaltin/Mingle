@@ -205,8 +205,8 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
         val date = Date()
         val map: MutableMap<String, Any?> = HashMap()
         map["time"] = sdf.format(date)
-        map["username"] = appSharedPreferences.getUserName()
-        map["imgUrl"] = appSharedPreferences.getImgUrl()
+        map["username"] = appSharedPreferences.userName
+        map["imgUrl"] = appSharedPreferences.imgUrl
         ref.child(uid).setValue(map).addOnSuccessListener {
             holder.icLike.setImageDrawable(ContextCompat.getDrawable(aCtx, R.drawable.ic_link_like))
         }

@@ -3,11 +3,11 @@ package com.iksanova.mingle.ui.login
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
-import android.text.Html
 import android.util.Log
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.viewpager.widget.ViewPager
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
@@ -46,32 +46,26 @@ class LoginActivity : BaseActivity(), ServiceListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
         auth = FirebaseAuth.getInstance()
-        //Hooks
         viewPager = findViewById(R.id.viewPager)
         dotsLayout = findViewById(R.id.dots)
-
         //Call Adapter
         appDescriptionSliderAdapter = AppDescriptionSliderAdapter(this)
         viewPager.adapter = appDescriptionSliderAdapter
-
-        //Dots
         addDots(0)
         viewPager.addOnPageChangeListener(changeListener)
         btnSignIn = findViewById(R.id.btn_signIn)
         btnSignIn.setOnClickListener { startActivity(Intent(this@LoginActivity, JoinNowActivity::class.java)) }
-
-        //Function
         oneTapLogin()
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun addDots(position: Int) {
-        dots = arrayOfNulls<TextView>(3) as Array<TextView>
+        dots = arrayOfNulls<TextView>(3) as? Array<TextView> ?: emptyArray()
         dotsLayout.removeAllViews()
         for (i in dots.indices) {
             dots[i] = TextView(this)
-            dots[i].text = Html.fromHtml("&#8226")
+            dots[i].text = HtmlCompat.fromHtml("&#8226", HtmlCompat.FROM_HTML_MODE_LEGACY)
             dots[i].textSize = 45f
             dotsLayout.addView(dots[i])
         }
@@ -113,9 +107,9 @@ class LoginActivity : BaseActivity(), ServiceListener {
         oneTapClient.beginSignIn(signInRequest)
             .addOnSuccessListener(this) { result ->
                 try {
-                    startIntentSenderForResult(
-                        result.pendingIntent.intentSender, reqOneTAP,
-                        null, 0, 0, 0
+                    startIntentSender(
+                        result.pendingIntent.intentSender,
+                        null, 0, 0, 0, null
                     )
                 } catch (e: IntentSender.SendIntentException) {
                     Log.e(tag, "Couldn't start One Tap UI: " + e.localizedMessage)
@@ -125,7 +119,6 @@ class LoginActivity : BaseActivity(), ServiceListener {
                 e.localizedMessage?.let { Log.d(tag, it) }
             }
     }
-
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -138,7 +131,6 @@ class LoginActivity : BaseActivity(), ServiceListener {
                 var imageUrl = credential.profilePictureUri.toString()
                 imageUrl = imageUrl.substring(0, imageUrl.length - 5) + "s400-c"
                 firebaseAuthWithGoogle(idToken, username, emailAddress, imageUrl)
-
                 if (idToken != null) {
                     // Got an ID token from Google. Use it to authenticate
                     // with your backend.
@@ -161,7 +153,6 @@ class LoginActivity : BaseActivity(), ServiceListener {
             }
         }
     }
-
     private fun firebaseAuthWithGoogle(idToken: String?, username: String?, emailAddress: String?, finalImageUrl: String?) {
         databaseReference = FirebaseDatabase.getInstance().reference.child("Users")
         val authCredential = GoogleAuthProvider.getCredential(idToken, null)
@@ -185,7 +176,7 @@ class LoginActivity : BaseActivity(), ServiceListener {
                                 .addOnCompleteListener {
                                     startActivity(
                                         Intent(this@LoginActivity,
-                                            LocationActivity::class.java));
+                                            LocationActivity::class.java))
                                     finish()
                                 }
                         } else {
@@ -208,12 +199,8 @@ class LoginActivity : BaseActivity(), ServiceListener {
             startActivity(Intent(this@LoginActivity, HomeActivity::class.java)); finish()
         }
     }
-
     override fun loggedIn() {}
-
     override fun fileDownloaded(file: File) {}
-
     override fun cancelled() {}
-
     override fun handleError(exception: Exception) {}
 }

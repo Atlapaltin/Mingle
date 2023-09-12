@@ -23,6 +23,6 @@ class JobsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Glide.with(requireContext()).load(appSharedPreferences.getImgUrl()).into(profileImg)
+        Glide.with(requireContext()).load(appSharedPreferences.imgUrl).into(profileImg)
     }
 }

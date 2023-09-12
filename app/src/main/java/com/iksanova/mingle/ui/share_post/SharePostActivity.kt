@@ -56,8 +56,8 @@ class SharePostActivity : BaseActivity() {
         profileImg = findViewById(R.id.user_img)
         closeImg = findViewById(R.id.close_img)
 
-        userName.text = appSharedPreferences.getUserName()
-        Glide.with(this).load(appSharedPreferences.getImgUrl()).into(profileImg)
+        userName.text = appSharedPreferences.userName
+        Glide.with(this).load(appSharedPreferences.imgUrl).into(profileImg)
 
         // Close Activity
         closeImg.setOnClickListener { finish() }

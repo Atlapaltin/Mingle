@@ -11,12 +11,11 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="@dimen/_35sdp"
-        android:src="@drawable/login_logo"
+        android:src="@mipmap/ic_splash_round"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/main_color"
         tools:ignore="ContentDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

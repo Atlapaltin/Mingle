@@ -15,7 +15,7 @@ class AppSharedPreferences(context: Context) {
 
     var imgUrl: String?
         set(value) {
-            editor.putString(IMG_URL_KEY, imgUrl)
+            editor.putString(IMG_URL_KEY, value)
             editor.apply()
         }
         get() = sharedPreference.getString(IMG_URL_KEY, null)
@@ -23,23 +23,5 @@ class AppSharedPreferences(context: Context) {
     companion object {
         private const val USERNAME_KEY = "username"
         private const val IMG_URL_KEY = "imgUrl"
-    }
-
-    fun setUsername(username: String) {
-        editor.putString(USERNAME_KEY, username)
-        editor.apply()
-    }
-
-    fun getUserName(): String? {
-        return sharedPreference.getString(USERNAME_KEY, null)
-    }
-
-    fun setImgUrl(imgUrl: String) {
-        editor.putString(IMG_URL_KEY, imgUrl)
-        editor.apply()
-    }
-
-    fun getImgUrl(): String? {
-        return sharedPreference.getString(IMG_URL_KEY, null)
     }
 }
