@@ -1,11 +1,14 @@
 package com.iksanova.mingle.ui.login
 
+import android.app.Activity
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.viewpager.widget.ViewPager
@@ -13,7 +16,7 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.gms.common.api.Status
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
@@ -107,10 +110,7 @@ class LoginActivity : BaseActivity(), ServiceListener {
         oneTapClient.beginSignIn(signInRequest)
             .addOnSuccessListener(this) { result ->
                 try {
-                    startIntentSender(
-                        result.pendingIntent.intentSender,
-                        null, 0, 0, 0, null
-                    )
+                    oneTapResult.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
                 } catch (e: IntentSender.SendIntentException) {
                     Log.e(tag, "Couldn't start One Tap UI: " + e.localizedMessage)
                 }
@@ -119,40 +119,34 @@ class LoginActivity : BaseActivity(), ServiceListener {
                 e.localizedMessage?.let { Log.d(tag, it) }
             }
     }
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == reqOneTAP) {
-            try {
-                val credential = oneTapClient.getSignInCredentialFromIntent(data)
-                val idToken = credential.googleIdToken
-                val username = credential.displayName
-                val emailAddress = credential.id
-                var imageUrl = credential.profilePictureUri.toString()
-                imageUrl = imageUrl.substring(0, imageUrl.length - 5) + "s400-c"
-                firebaseAuthWithGoogle(idToken, username, emailAddress, imageUrl)
-                if (idToken != null) {
-                    // Got an ID token from Google. Use it to authenticate
-                    // with your backend.
-                    Log.d(tag, "Got ID token.")
+    private val oneTapResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
+            val idToken = credential.googleIdToken
+            val username = credential.displayName
+            val emailAddress = credential.id
+            var imageUrl = credential.profilePictureUri.toString()
+            imageUrl = imageUrl.substring(0, imageUrl.length - 5) + "s400-c"
+            firebaseAuthWithGoogle(idToken, username, emailAddress, imageUrl)
+            if (idToken != null) {
+                // Got an ID token from Google. Use it to authenticate
+                // with your backend.
+                Log.d(tag, "Got ID token.")
+            }
+        } else {
+            val e = ApiException(Status.RESULT_CANCELED)
+            when (result.resultCode) {
+                Activity.RESULT_CANCELED -> {
+                    Log.d(tag, "One-tap dialog was closed.")
+                    // Don't re-prompt the user.
                 }
-            } catch (e: ApiException) {
-                when (e.statusCode) {
-                    CommonStatusCodes.CANCELED -> {
-                        Log.d(tag, "One-tap dialog was closed.")
-                        // Don't re-prompt the user.
-                    }
-                    CommonStatusCodes.NETWORK_ERROR -> {
-                        Log.d(tag, "One-tap encountered a network error.")
-                        // Try again or just ignore.
-                    }
-                    else -> {
-                        Log.d(tag, "Couldn't get credential from result." + e.localizedMessage)
-                    }
+                else -> {
+                    Log.d(tag, "Couldn't get credential from result." + e.localizedMessage)
                 }
             }
         }
     }
+
     private fun firebaseAuthWithGoogle(idToken: String?, username: String?, emailAddress: String?, finalImageUrl: String?) {
         databaseReference = FirebaseDatabase.getInstance().reference.child("Users")
         val authCredential = GoogleAuthProvider.getCredential(idToken, null)

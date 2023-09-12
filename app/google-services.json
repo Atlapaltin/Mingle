@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "897428087711-nkdnln3oerr03q5or19cp9kipa18qed9.apps.googleusercontent.com",
+          "client_id": "897428087711-s0sihm504lesnm5do7man0ihp2v87833.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.iksanova.mingle",
+            "certificate_hash": "70934699dc42310f1741e048e78632b677eee2f0"
+          }
+        },
+        {
+          "client_id": "897428087711-jv1bt01s8qmetfgahaanf760fg77bq50.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "897428087711-nkdnln3oerr03q5or19cp9kipa18qed9.apps.googleusercontent.com",
+              "client_id": "897428087711-jv1bt01s8qmetfgahaanf760fg77bq50.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
