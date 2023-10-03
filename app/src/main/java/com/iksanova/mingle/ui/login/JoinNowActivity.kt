@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,11 +28,8 @@ import com.iksanova.mingle.ui.location.LocationActivity
 
 class JoinNowActivity : AppCompatActivity() {
 
-    private lateinit var googleBtn: RelativeLayout
+    private lateinit var continueBtn: Button
     private lateinit var auth: FirebaseAuth
-    private lateinit var client: GoogleSignInClient
-    private val rcSignIn = 1
-    private val tag = "JoinActivity"
     private lateinit var databaseReference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,52 +37,17 @@ class JoinNowActivity : AppCompatActivity() {
         setContentView(R.layout.activity_join_now)
         auth = FirebaseAuth.getInstance()
 
-        googleBtn = findViewById(R.id.card_google_btn)
-        googleBtn.setOnClickListener { googleSignIn() }
+        continueBtn = findViewById(R.id.continue_btn)
+        continueBtn.setOnClickListener { signIn() }
         databaseReference = FirebaseDatabase.getInstance().reference.child("Users")
-
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestProfile()
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .build()
-
-        client = GoogleSignIn.getClient(this, gso)
     }
 
-    private fun googleSignIn() {
-        val intent = client.signInIntent
-        resultLauncher.launch(intent)
-    }
+    private fun signIn() {
+        val email = findViewById<EditText>(R.id.edit_email).text.toString()
+        val password = findViewById<EditText>(R.id.edit_password).text.toString()
 
-    private val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                val email = account.email
-                val username = account.displayName
-                var imageUrl = account.photoUrl.toString()
-                imageUrl = imageUrl.substring(0, imageUrl.length - 5) + "s400-c"
-
-                firebaseAuthWithGoogle(account.idToken, username, email, imageUrl)
-            } catch (e: ApiException) {
-                Toast.makeText(this, "Sign in Error", Toast.LENGTH_LONG).show()
-                Log.w("Error", "Google sign in failed", e)
-            }
-        }
-    }
-
-    private fun firebaseAuthWithGoogle(
-        idToken: String?,
-        username: String?,
-        emailAddress: String?,
-        finalImageUrl: String?
-    ) {
-        val authCredential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(authCredential)
-            .addOnCompleteListener { task ->
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -91,9 +55,9 @@ class JoinNowActivity : AppCompatActivity() {
                                 startActivity(Intent(this@JoinNowActivity, HomeActivity::class.java))
                             } else {
                                 val model = UserModel(
-                                    emailAddress = emailAddress,
-                                    imageUrl = finalImageUrl,
-                                    username = username,
+                                    emailAddress = email,
+                                    imageUrl = null,
+                                    username = null,
                                     key = auth.currentUser!!.uid,
                                     token = null,
                                     location = null,
@@ -109,8 +73,9 @@ class JoinNowActivity : AppCompatActivity() {
                         override fun onCancelled(databaseError: DatabaseError) {}
                     })
                 } else {
-                    Log.w(tag, "signInWithCustomToken:failure", task.exception)
+                    Toast.makeText(this, "Authentication failed.", Toast.LENGTH_SHORT).show()
                 }
             }
     }
 }
+

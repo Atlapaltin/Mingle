@@ -15,7 +15,9 @@
         android:padding="@dimen/_5sdp"
         app:layout_constraintBottom_toTopOf="@id/layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
 
     <LinearLayout
@@ -81,37 +83,6 @@
 
 
         </androidx.cardview.widget.CardView>
-
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginStart="@dimen/_10sdp"
-            android:layout_marginEnd="@dimen/_10sdp"
-            android:background="@drawable/outline_button">
-
-            <ImageView
-                android:id="@+id/google_img"
-                android:layout_width="21dp"
-                android:layout_height="21dp"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/button_text2"
-                android:src="@drawable/google" />
-
-
-            <TextView
-                android:id="@+id/button_text2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_centerVertical="true"
-                android:gravity="center"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:text="@string/join_with_google"
-                android:textColor="@color/gray"
-                android:textSize="@dimen/_16ssp" />
-        </RelativeLayout>
 
 
         <TextView

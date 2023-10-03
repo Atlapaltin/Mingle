@@ -96,7 +96,7 @@ class SharePostActivity : BaseActivity() {
         map["username"] = appSharedPreferences.userName
         map["userProfile"] = appSharedPreferences.imgUrl
         map["key"] = key!!
-        ref.child(key).child(INFO).setValue(map).addOnCompleteListener { task ->
+        ref.child(key).child(INFO).setValue(map).addOnCompleteListener {
             loadingDialog.dismissDialog()
             val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

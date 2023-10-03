@@ -5,8 +5,10 @@ import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -39,9 +41,6 @@ class LoginActivity : BaseActivity(), ServiceListener {
     private lateinit var dotsLayout: LinearLayout
     private lateinit var appDescriptionSliderAdapter: AppDescriptionSliderAdapter
     private lateinit var dots: Array<TextView>
-    private lateinit var oneTapClient: SignInClient
-    private val reqOneTAP = 1
-    private val tag = "LoginActivity"
     private lateinit var btnSignIn: TextView
     private lateinit var auth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
@@ -58,8 +57,7 @@ class LoginActivity : BaseActivity(), ServiceListener {
         addDots(0)
         viewPager.addOnPageChangeListener(changeListener)
         btnSignIn = findViewById(R.id.btn_signIn)
-        btnSignIn.setOnClickListener { startActivity(Intent(this@LoginActivity, JoinNowActivity::class.java)) }
-        oneTapLogin()
+        btnSignIn.setOnClickListener { signInWithEmail() }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -87,114 +85,50 @@ class LoginActivity : BaseActivity(), ServiceListener {
         override fun onPageScrollStateChanged(state: Int) {}
     }
 
-    private fun oneTapLogin() {
-        oneTapClient = Identity.getSignInClient(this)
-        val signInRequest = BeginSignInRequest.builder()
-            .setPasswordRequestOptions(
-                BeginSignInRequest.PasswordRequestOptions.builder()
-                    .setSupported(true)
-                    .build()
-            )
-            .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                    .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
-                    .setServerClientId(getString(R.string.default_web_client_id))
-                    // Only show accounts previously used to sign in.
-                    .setFilterByAuthorizedAccounts(false)
-                    .build()
-            )
-            // Automatically sign in when exactly one credential is retrieved.
-            .build()
+    private fun signInWithEmail() {
+        val emailEditText = findViewById<EditText>(R.id.edit_email)
+        val passwordEditText = findViewById<EditText>(R.id.edit_password)
+        val email = emailEditText.text.toString()
+        val password = passwordEditText.text.toString()
 
-        oneTapClient.beginSignIn(signInRequest)
-            .addOnSuccessListener(this) { result ->
-                try {
-                    oneTapResult.launch(IntentSenderRequest.Builder(result.pendingIntent.intentSender).build())
-                } catch (e: IntentSender.SendIntentException) {
-                    Log.e(tag, "Couldn't start One Tap UI: " + e.localizedMessage)
-                }
-            }
-            .addOnFailureListener(this) { e ->
-                e.localizedMessage?.let { Log.d(tag, it) }
-            }
-    }
-    private val oneTapResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
-            val idToken = credential.googleIdToken
-            val username = credential.displayName
-            val emailAddress = credential.id
-            var imageUrl = credential.profilePictureUri.toString()
-            imageUrl = imageUrl.substring(0, imageUrl.length - 5) + "s400-c"
-            firebaseAuthWithGoogle(idToken, username, emailAddress, imageUrl)
-            if (idToken != null) {
-                // Got an ID token from Google. Use it to authenticate
-                // with your backend.
-                Log.d(tag, "Got ID token.")
-            }
-        } else {
-            val e = ApiException(Status.RESULT_CANCELED)
-            when (result.resultCode) {
-                Activity.RESULT_CANCELED -> {
-                    Log.d(tag, "One-tap dialog was closed.")
-                    // Don't re-prompt the user.
-                }
-                else -> {
-                    Log.d(tag, "Couldn't get credential from result." + e.localizedMessage)
-                }
-            }
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
+            return
         }
-    }
 
-    private fun firebaseAuthWithGoogle(idToken: String?, username: String?, emailAddress: String?, finalImageUrl: String?) {
-        databaseReference = FirebaseDatabase.getInstance().reference.child("Users")
-        val authCredential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(authCredential).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        if (!dataSnapshot.hasChild(auth.currentUser!!.uid)) {
-                            val model = UserModel(
-                                emailAddress = emailAddress,
-                                imageUrl = finalImageUrl,
-                                username = username,
-                                key = auth.currentUser!!.uid,
-                                token = null,
-                                location = null,
-                                headline = null,
-                                about = null,
-                            )
-                            databaseReference.child(auth.currentUser!!.uid).child(Constants.INFO)
-                                .setValue(model)
-                                .addOnCompleteListener {
-                                    startActivity(
-                                        Intent(this@LoginActivity,
-                                            LocationActivity::class.java))
-                                    finish()
-                                }
-                        } else {
-                            startActivity(Intent(this@LoginActivity, HomeActivity::class.java)); finish()
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    databaseReference = FirebaseDatabase.getInstance().reference.child("Users")
+                    databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            if (dataSnapshot.hasChild(auth.currentUser!!.uid)) {
+                                startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+                            } else {
+                                startActivity(Intent(this@LoginActivity, LocationActivity::class.java))
+                            }
+                            finish()
                         }
-                    }
 
-                    override fun onCancelled(error: DatabaseError) {}
-                })
-            } else {
-                // If sign in fails, display a message to the user.
-                Log.w(tag, "signInWithCustomToken:failure", task.exception)
+                        override fun onCancelled(error: DatabaseError) {}
+                    })
+                } else {
+                    Toast.makeText(this, "Authentication failed", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
     }
 
     override fun onStart() {
         super.onStart()
         if (auth.currentUser != null) {
-            startActivity(Intent(this@LoginActivity, HomeActivity::class.java)); finish()
+            startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+            finish()
         }
     }
+
     override fun loggedIn() {}
     override fun fileDownloaded(file: File) {}
     override fun cancelled() {}
     override fun handleError(exception: Exception) {}
 }
+

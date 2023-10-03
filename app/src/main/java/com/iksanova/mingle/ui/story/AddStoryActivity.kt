@@ -56,12 +56,12 @@ class AddStoryActivity : BaseActivity() {
                 getFileExtension(mImageUri))
 
         storageTask = imageReference.putFile(mImageUri).apply {
-            continueWithTask(Continuation { task ->
+            continueWithTask { task ->
                 if (!task.isSuccessful) {
                     throw task.exception!!
                 }
                 imageReference.downloadUrl
-            }).addOnCompleteListener { task ->
+            }.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val downloadUri = task.result
                     myUrl = downloadUri.toString()
@@ -85,7 +85,7 @@ class AddStoryActivity : BaseActivity() {
                     hashMap["storyId"] = storyId
                     hashMap["userId"] = myId
                     hashMap["timeUpload"] = sdf.format(date)
-                    databaseReference.setValue(hashMap).addOnCompleteListener { task ->
+                    databaseReference.setValue(hashMap).addOnCompleteListener { _ ->
                         progressDialog.dismiss()
                         finish()
                     }

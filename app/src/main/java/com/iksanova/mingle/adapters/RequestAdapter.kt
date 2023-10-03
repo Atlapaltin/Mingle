@@ -33,14 +33,14 @@ class RequestAdapter(private val aCtx: Context, private val list: List<RequestMo
         val user = FirebaseAuth.getInstance().currentUser
         val ref = FirebaseDatabase.getInstance().getReference(USER_CONSTANT).child(user!!.uid)
 
-        holder.connectOk.setOnClickListener(View.OnClickListener {
+        holder.connectOk.setOnClickListener {
             list[position].key?.let { it1 -> ref.child(REQUEST).child(it1).setValue(null) }
             list[position].key?.let { it1 -> ref.child(CONNECTIONS).child(it1).setValue(true) }
-        })
+        }
 
-        holder.connectCancel.setOnClickListener(View.OnClickListener {
+        holder.connectCancel.setOnClickListener {
             list[position].key?.let { it1 -> ref.child(it1).setValue(null) }
-        })
+        }
     }
 
     override fun getItemCount(): Int {

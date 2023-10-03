@@ -10,6 +10,7 @@ import com.iksanova.mingle.base.BaseActivity
 import com.iksanova.mingle.ui.login.LoginActivity
 import androidx.appcompat.app.AppCompatActivity
 
+@SuppressLint("CustomSplashScreen")
 class SplashScreenActivity : AppCompatActivity() {
     private lateinit var mHandler: Handler
     private lateinit var mRunnable: Runnable

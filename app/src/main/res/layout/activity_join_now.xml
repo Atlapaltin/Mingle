@@ -168,16 +168,6 @@
                 android:layout_weight="1"
                 android:background="@color/gray" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Или"
-                android:textColor="@color/gray"
-                android:textSize="@dimen/_16ssp" />
-
             <View
                 android:layout_width="0dp"
                 android:layout_height="1dp"
@@ -187,36 +177,6 @@
         </LinearLayout>
 
 
-        <RelativeLayout
-            android:id="@+id/card_google_btn"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/outline_button">
-
-            <ImageView
-                android:id="@+id/google_img"
-                android:layout_width="21dp"
-                android:layout_height="21dp"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/button_text2"
-                android:src="@drawable/google"
-                tools:ignore="ContentDescription"
-                />
-
-
-            <TextView
-                android:id="@+id/button_text2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_centerVertical="true"
-                android:gravity="center"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:text="@string/sign_with_google"
-                android:textColor="@color/gray"
-                android:textSize="@dimen/_16ssp" />
-        </RelativeLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

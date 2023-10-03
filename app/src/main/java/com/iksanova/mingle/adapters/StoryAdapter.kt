@@ -113,13 +113,13 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
                 if (click) {
                     if (count > 0) {
                         val alertDialog = AlertDialog.Builder(aCtx).create()
-                        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "View Story") { dialogInterface, i ->
+                        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "View Story") { dialogInterface, _ ->
                             val intent = Intent(aCtx, StoryActivity::class.java)
                             intent.putExtra("userid", FirebaseAuth.getInstance().currentUser!!.uid)
                             aCtx.startActivity(intent)
                             dialogInterface.dismiss()
                         }
-                        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Add Story") { dialogInterface, i ->
+                        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Add Story") { dialogInterface, _ ->
                             val intent = Intent(aCtx, AddStoryActivity::class.java)
                             aCtx.startActivity(intent)
                             dialogInterface.dismiss()

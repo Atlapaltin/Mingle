@@ -45,6 +45,7 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
         return MyViewHolder(view)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(holder: MyViewHolder, @SuppressLint("RecyclerView") position: Int) {
         val user = FirebaseAuth.getInstance().currentUser
         val ref = FirebaseDatabase.getInstance().reference
@@ -60,6 +61,7 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
                 return super.onSingleTapUp(e)
             }
 
+            @SuppressLint("ClickableViewAccessibility")
             override fun onLongPress(e: MotionEvent) {
                 val config = ReactionsConfigBuilder(aCtx)
                     .withReactions(intArrayOf(

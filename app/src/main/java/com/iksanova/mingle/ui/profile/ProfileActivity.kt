@@ -98,7 +98,7 @@ class ProfileActivity : BaseActivity() {
             userRef.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     userRef.child("Data").child("about").setValue(editTextAbout.text.toString())
-                        .addOnCompleteListener { task ->
+                        .addOnCompleteListener {
                             if (editAboutLayout.visibility == View.VISIBLE) {
                                 startActivity(Intent(this@ProfileActivity, ProfileActivity::class.java))
                             }
