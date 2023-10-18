@@ -46,17 +46,18 @@
                     android:textColor="@color/black"
                     android:textSize="@dimen/_14ssp" />
 
-                <TextView
+                <Button
                     android:id="@+id/btn_post"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="107dp"
+                    android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
+                    android:layout_alignParentBottom="true"
                     android:layout_marginEnd="@dimen/_10sdp"
+                    android:layout_marginBottom="0dp"
                     android:fontFamily="@font/roboto_bold"
                     android:text="@string/post"
-                    android:textColor="@color/light_gray"
-                    android:textSize="@dimen/_12ssp" />
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_11ssp" />
             </RelativeLayout>
 
         </androidx.appcompat.widget.Toolbar>

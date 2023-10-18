@@ -13,16 +13,21 @@ import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.iksanova.mingle.R
 import com.iksanova.mingle.base.BaseActivity
-import com.iksanova.mingle.constants.Constants.INFO
 import com.iksanova.mingle.ui.home.HomeActivity
 import com.iksanova.mingle.utils.AppSharedPreferences
 import com.iksanova.mingle.utils.LoadingDialog
 import com.theartofdev.edmodo.cropper.CropImage
+import org.json.JSONObject
+import java.io.IOException
+import okhttp3.Callback
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class SharePostActivity : BaseActivity() {
     private lateinit var editText: EditText
@@ -60,13 +65,19 @@ class SharePostActivity : BaseActivity() {
         Glide.with(this).load(appSharedPreferences.imgUrl).into(profileImg)
 
         // Close Activity
-        closeImg.setOnClickListener { finish() }
+        closeImg.setOnClickListener {
+            finish()
+        }
 
         // Select Image
-        btnSelectImg.setOnClickListener { openFileChooser() }
+        btnSelectImg.setOnClickListener {
+            openFileChooser()
+        }
+
         editText.requestFocus()
         editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 btnPost.setTextColor(Color.BLACK)
             }
@@ -88,20 +99,40 @@ class SharePostActivity : BaseActivity() {
     }
 
     private fun uploadData(description: String) {
-        val ref = FirebaseDatabase.getInstance().reference.child("AllPosts")
-        val key = ref.push().key
-        val map: HashMap<String, Any?> = HashMap()
-        map["description"] = description
-        map["imgUrl"] = ""
-        map["username"] = appSharedPreferences.userName
-        map["userProfile"] = appSharedPreferences.imgUrl
-        map["key"] = key!!
-        ref.child(key).child(INFO).setValue(map).addOnCompleteListener {
-            loadingDialog.dismissDialog()
-            val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-        }
+        val url = "https://netomedia.ru/api/posts/"
+        val client = OkHttpClient()
+        val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+        val jsonObject = JSONObject()
+        jsonObject.put("description", description)
+        jsonObject.put("username", appSharedPreferences.userName)
+        jsonObject.put("userProfile", appSharedPreferences.imgUrl)
+        val requestBody = jsonObject.toString().toRequestBody(mediaType)
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer ${appSharedPreferences.token}")
+            .post(requestBody)
+            .build()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                runOnUiThread {
+                    loadingDialog.dismissDialog()
+                    Toast.makeText(this@SharePostActivity, "Failed to share post", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                runOnUiThread {
+                    loadingDialog.dismissDialog()
+                    if (response.isSuccessful) {
+                        val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this@SharePostActivity, "Failed to share post", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        })
     }
 
     private fun openFileChooser() {
@@ -114,7 +145,6 @@ class SharePostActivity : BaseActivity() {
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == pickImageRequest && resultCode == RESULT_OK && data != null) {
             mImageUri = data.data
             CropImage.activity(mImageUri)
@@ -127,7 +157,6 @@ class SharePostActivity : BaseActivity() {
                 Glide.with(this).load(mImageUri)
                     .into(postImg)
                 btnPost.setTextColor(Color.BLACK)
-
             } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                 val error = result.error
                 Toast.makeText(this@SharePostActivity, "" + error, Toast.LENGTH_SHORT).show()
@@ -140,21 +169,41 @@ class SharePostActivity : BaseActivity() {
         reference.putFile(mImageUri)
             .addOnSuccessListener {
                 reference.downloadUrl.addOnSuccessListener { uri ->
-                    val ref = FirebaseDatabase.getInstance().reference.child("AllPosts")
-                    val key = ref.push().key
-                    val map: HashMap<String, Any?> = HashMap()
-                    val imageUrl = uri.toString()
-                    map["imgUrl"] = imageUrl
-                    map["description"] = editText.text.toString()
-                    map["username"] = appSharedPreferences.userName
-                    map["userProfile"] = appSharedPreferences.imgUrl
-                    map["key"] = key!!
-                    ref.child(key).child(INFO).setValue(map).addOnCompleteListener {
-                        loadingDialog.dismissDialog()
-                        val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-                    }
+                    val url = "https://netomedia.ru/api/posts/"
+                    val client = OkHttpClient()
+                    val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+                    val jsonObject = JSONObject()
+                    jsonObject.put("description", editText.text.toString())
+                    jsonObject.put("username", appSharedPreferences.userName)
+                    jsonObject.put("userProfile", appSharedPreferences.imgUrl)
+                    jsonObject.put("imgUrl", uri.toString())
+                    val requestBody = jsonObject.toString().toRequestBody(mediaType)
+                    val request = Request.Builder()
+                        .url(url)
+                        .addHeader("Authorization", "Bearer ${appSharedPreferences.token}")
+                        .post(requestBody)
+                        .build()
+                    client.newCall(request).enqueue(object : Callback {
+                        override fun onFailure(call: okhttp3.Call, e: IOException) {
+                            runOnUiThread {
+                                loadingDialog.dismissDialog()
+                                Toast.makeText(this@SharePostActivity, "Failed to share post", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                            runOnUiThread {
+                                loadingDialog.dismissDialog()
+                                if (response.isSuccessful) {
+                                    val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
+                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    startActivity(intent)
+                                } else {
+                                    Toast.makeText(this@SharePostActivity, "Failed to share post", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    })
                 }
             }
             .addOnFailureListener { e ->

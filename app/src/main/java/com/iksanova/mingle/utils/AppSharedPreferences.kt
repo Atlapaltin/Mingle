@@ -4,6 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class AppSharedPreferences(context: Context) {
+    private val tokenKey = ""
+    var token: String
+        get() = sharedPreference.getString(tokenKey, "") ?: ""
+        set(value) {
+            editor.putString(tokenKey, value)
+            editor.apply()
+        }
     private val sharedPreference: SharedPreferences = context.getSharedPreferences("Login_ID", Context.MODE_PRIVATE)
     private val editor: SharedPreferences.Editor = sharedPreference.edit()
     var userName: String?
