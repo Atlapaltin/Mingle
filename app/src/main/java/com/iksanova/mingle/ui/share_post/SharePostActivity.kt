@@ -103,20 +103,23 @@ class SharePostActivity : BaseActivity() {
         val client = OkHttpClient()
         val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
         val jsonObject = JSONObject()
-        jsonObject.put("description", description)
-        jsonObject.put("username", appSharedPreferences.userName)
-        jsonObject.put("userProfile", appSharedPreferences.imgUrl)
+        jsonObject.put("content", description)
+        jsonObject.put("id", 0)
         val requestBody = jsonObject.toString().toRequestBody(mediaType)
         val request = Request.Builder()
             .url(url)
-            .addHeader("Authorization", "Bearer ${appSharedPreferences.token}")
+            .addHeader("Authorization", appSharedPreferences.token)
             .post(requestBody)
             .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: okhttp3.Call, e: IOException) {
                 runOnUiThread {
                     loadingDialog.dismissDialog()
-                    Toast.makeText(this@SharePostActivity, "Failed to share post", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@SharePostActivity,
+                        "Failed to share post",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
@@ -125,10 +128,15 @@ class SharePostActivity : BaseActivity() {
                     loadingDialog.dismissDialog()
                     if (response.isSuccessful) {
                         val intent = Intent(this@SharePostActivity, HomeActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         startActivity(intent)
                     } else {
-                        Toast.makeText(this@SharePostActivity, "Failed to share post", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@SharePostActivity,
+                            "Failed to share post",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -180,7 +188,7 @@ class SharePostActivity : BaseActivity() {
                     val requestBody = jsonObject.toString().toRequestBody(mediaType)
                     val request = Request.Builder()
                         .url(url)
-                        .addHeader("Authorization", "Bearer ${appSharedPreferences.token}")
+                        .addHeader("Authorization", "${appSharedPreferences.token}")
                         .post(requestBody)
                         .build()
                     client.newCall(request).enqueue(object : Callback {
