@@ -1,54 +1,43 @@
 package com.iksanova.mingle.ui.login
 
-import android.app.Activity
 import android.content.Intent
-import android.content.IntentSender
 import android.os.Bundle
-import android.util.Log
+import android.support.v4.media.session.MediaSessionCompat
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.viewpager.widget.ViewPager
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.Status
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
+import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.iksanova.mingle.R
 import com.iksanova.mingle.adapters.AppDescriptionSliderAdapter
-import com.iksanova.mingle.base.BaseActivity
-import com.iksanova.mingle.constants.Constants
 import com.iksanova.mingle.helper.ServiceListener
-import com.iksanova.mingle.models.UserModel
 import com.iksanova.mingle.ui.home.HomeActivity
-import com.iksanova.mingle.ui.location.LocationActivity
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.File
+import java.io.IOException
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
 
-class LoginActivity : BaseActivity(), ServiceListener {
+class LoginActivity : AppCompatActivity(), ServiceListener {
     private lateinit var viewPager: ViewPager
     private lateinit var dotsLayout: LinearLayout
     private lateinit var appDescriptionSliderAdapter: AppDescriptionSliderAdapter
     private lateinit var dots: Array<TextView>
     private lateinit var btnSignIn: TextView
-    private lateinit var auth: FirebaseAuth
-    private lateinit var databaseReference: DatabaseReference
+    private lateinit var accessToken: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-        auth = FirebaseAuth.getInstance()
         viewPager = findViewById(R.id.viewPager)
         dotsLayout = findViewById(R.id.dots)
         //Call Adapter
@@ -96,31 +85,48 @@ class LoginActivity : BaseActivity(), ServiceListener {
             return
         }
 
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    databaseReference = FirebaseDatabase.getInstance().reference.child("Users")
-                    databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(dataSnapshot: DataSnapshot) {
-                            if (dataSnapshot.hasChild(auth.currentUser!!.uid)) {
-                                startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
-                            } else {
-                                startActivity(Intent(this@LoginActivity, LocationActivity::class.java))
-                            }
-                            finish()
-                        }
+        val authenticationRequest = authenticationRequest<Any>(email, password)
+        val gson = Gson()
+        val requestBody = gson.toJson(authenticationRequest)
 
-                        override fun onCancelled(error: DatabaseError) {}
-                    })
-                } else {
-                    Toast.makeText(this, "Authentication failed", Toast.LENGTH_SHORT).show()
+        val request = Request.Builder()
+            .url("https://netomedia.ru/api/users/")
+            .post(RequestBody.create("application/json".toMediaTypeOrNull(), requestBody))
+            .build()
+
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@LoginActivity, "Authentication failed", Toast.LENGTH_SHORT).show()
                 }
             }
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                val token = gson.fromJson(responseBody, MediaSessionCompat.Token::class.java)
+                if (response.isSuccessful && token != null) {
+                    accessToken = token.token.toString()
+                    runOnUiThread {
+                        startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+                        finish()
+                    }
+                } else {
+                    val error = gson.fromJson(responseBody, Error::class.java)
+                    val errorMessage = if (!error.cause.isNullOrEmpty()) error.cause else "Authentication failed"
+                    runOnUiThread {
+                        Toast.makeText(this@LoginActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+
+        })
     }
 
     override fun onStart() {
         super.onStart()
-        if (auth.currentUser != null) {
+        if (accessToken.isNotEmpty()) {
             startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
             finish()
         }
@@ -130,5 +136,27 @@ class LoginActivity : BaseActivity(), ServiceListener {
     override fun fileDownloaded(file: File) {}
     override fun cancelled() {}
     override fun handleError(exception: Exception) {}
+    private fun <T> authenticationRequest(
+        email: String,
+        password: String
+    ): JsonElement? {
+        val gson = Gson()
+        val jsonObject = JsonObject()
+        jsonObject.addProperty("username", email)
+        jsonObject.addProperty("password", password)
+        jsonObject.addProperty("rememberMe", true)
+        val json = gson.toJson(jsonObject)
+        val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), json)
+        val request = Request.Builder()
+            .url("https://netomedia.ru/api/users/")
+            .post(requestBody)
+            .build()
+        val response = OkHttpClient().newCall(request).execute()
+        return gson.fromJson(response.body?.string(), JsonElement::class.java)
+    }
+
+
 }
+
+
 

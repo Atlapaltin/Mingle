@@ -1,5 +1,6 @@
 package com.iksanova.mingle.helper
 
+import com.google.gson.JsonElement
 import java.io.File
 
 interface ServiceListener {
@@ -7,4 +8,8 @@ interface ServiceListener {
     fun fileDownloaded(file: File) //2
     fun cancelled() //3
     fun handleError(exception: Exception) //4
+    interface ServiceListener {
+        fun authenticationRequest(email: String, password: String): JsonElement?
+    }
+
 }
