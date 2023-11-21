@@ -31,10 +31,12 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
+        resources {
+            excludes += ['META-INF/DEPENDENCIES']
+        }
     }
+
 }
 
 dependencies {
@@ -49,12 +51,13 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'org.jetbrains:annotations:24.0.1'
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'com.google.code.gson:gson:2.10'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
     implementation platform('com.google.firebase:firebase-bom:32.2.3')
-    implementation 'com.google.firebase:firebase-auth-ktx:22.2.0'
+    implementation 'com.google.firebase:firebase-auth-ktx:22.3.0'
     implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.firebase:firebase-storage'
     implementation 'com.google.firebase:firebase-dynamic-links-ktx'

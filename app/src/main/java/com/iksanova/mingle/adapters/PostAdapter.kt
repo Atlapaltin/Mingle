@@ -36,7 +36,8 @@ import java.util.Locale
 import com.luseen.autolinklibrary.AutoLinkMode
 import com.luseen.autolinklibrary.AutoLinkTextView
 
-class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) : RecyclerView.Adapter<PostAdapter.MyViewHolder>() {
+class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) :
+    RecyclerView.Adapter<PostAdapter.MyViewHolder>() {
     private val strings = arrayOf("Like", "Celebrate", "Support", "Love", "Insightful", "Idea")
     private val appSharedPreferences = AppSharedPreferences(aCtx)
 
@@ -149,7 +150,7 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
         }
 
         holder.desc.addAutoLinkMode(AutoLinkMode.MODE_HASHTAG)
-        holder.desc.setHashtagModeColor(aCtx.resources.getColor(R.color.main_color))
+        holder.desc.setHashtagModeColor(ContextCompat.getColor(aCtx, R.color.main_color))
         holder.desc.setAutoLinkText(list[position].description)
 
         Glide.with(aCtx).load(list[position].userProfile).into(holder.userImage)
@@ -235,7 +236,4 @@ class PostAdapter(private val aCtx: Context, private val list: List<PostModel>) 
         return position.toLong()
     }
 
-    override fun setHasStableIds(hasStableIds: Boolean) {
-        super.setHasStableIds(hasStableIds)
-    }
 }

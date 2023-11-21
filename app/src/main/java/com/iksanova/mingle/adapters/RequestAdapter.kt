@@ -6,12 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.iksanova.mingle.R
 import com.iksanova.mingle.constants.Constants.CONNECTIONS
@@ -19,7 +16,8 @@ import com.iksanova.mingle.constants.Constants.REQUEST
 import com.iksanova.mingle.constants.Constants.USER_CONSTANT
 import com.iksanova.mingle.models.RequestModel
 
-class RequestAdapter(private val aCtx: Context, private val list: List<RequestModel>) : RecyclerView.Adapter<RequestAdapter.MyViewHolder>() {
+class RequestAdapter(private val aCtx: Context, private val list: List<RequestModel>) :
+    RecyclerView.Adapter<RequestAdapter.MyViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view = LayoutInflater.from(aCtx).inflate(R.layout.card_network_request, parent, false)

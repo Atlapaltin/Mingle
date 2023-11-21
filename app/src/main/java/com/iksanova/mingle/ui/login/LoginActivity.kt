@@ -1,5 +1,6 @@
 package com.iksanova.mingle.ui.login
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
@@ -21,10 +22,10 @@ import com.iksanova.mingle.helper.ServiceListener
 import com.iksanova.mingle.ui.home.HomeActivity
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import java.io.File
 import java.io.IOException
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 
 class LoginActivity : AppCompatActivity(), ServiceListener {
@@ -70,7 +71,6 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
         override fun onPageSelected(position: Int) {
             addDots(position)
         }
-
         override fun onPageScrollStateChanged(state: Int) {}
     }
 
@@ -85,13 +85,13 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
             return
         }
 
-        val authenticationRequest = authenticationRequest<Any>(email, password)
+        val authenticationRequest = authenticationRequest(email, password)
         val gson = Gson()
         val requestBody = gson.toJson(authenticationRequest)
 
         val request = Request.Builder()
             .url("https://netomedia.ru/api/users/")
-            .post(RequestBody.create("application/json".toMediaTypeOrNull(), requestBody))
+            .post(requestBody.toRequestBody("application/json".toMediaTypeOrNull()))
             .build()
 
         val client = OkHttpClient()
@@ -113,14 +113,12 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
                     }
                 } else {
                     val error = gson.fromJson(responseBody, Error::class.java)
-                    val errorMessage = if (!error.cause.isNullOrEmpty()) error.cause else "Authentication failed"
+                    val errorMessage = error.reason.ifEmpty { "Authentication failed" }
                     runOnUiThread {
                         Toast.makeText(this@LoginActivity, errorMessage, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-
-
         })
     }
 
@@ -132,11 +130,15 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
         }
     }
 
-    override fun loggedIn() {}
-    override fun fileDownloaded(file: File) {}
-    override fun cancelled() {}
-    override fun handleError(exception: Exception) {}
-    private fun <T> authenticationRequest(
+    override fun loggedIn(isLoggedIn: Boolean) {
+        val sharedPref = getSharedPreferences("myAppPref", Context.MODE_PRIVATE) ?: return
+        with (sharedPref.edit()) {
+            putBoolean("isLoggedIn", isLoggedIn)
+            apply()
+        }
+    }
+
+    override fun authenticationRequest(
         email: String,
         password: String
     ): JsonElement? {
@@ -146,7 +148,7 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
         jsonObject.addProperty("password", password)
         jsonObject.addProperty("rememberMe", true)
         val json = gson.toJson(jsonObject)
-        val requestBody = RequestBody.create("application/json".toMediaTypeOrNull(), json)
+        val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
         val request = Request.Builder()
             .url("https://netomedia.ru/api/users/")
             .post(requestBody)
@@ -154,8 +156,6 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
         val response = OkHttpClient().newCall(request).execute()
         return gson.fromJson(response.body?.string(), JsonElement::class.java)
     }
-
-
 }
 
 

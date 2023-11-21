@@ -39,15 +39,15 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
         val model = list[position]
         userInfo(holder, model.userId, position)
 
-        if (holder.adapterPosition != 0) {
+        if (holder.bindingAdapterPosition != 0) {
             seenStory(holder, model.userId)
         }
-        if (holder.adapterPosition == 0) {
+        if (holder.bindingAdapterPosition == 0) {
             myStory(holder.addStoryText, holder.storyPlus, false, holder)
         }
 
         holder.itemView.setOnClickListener {
-            if (holder.adapterPosition == 0) {
+            if (holder.bindingAdapterPosition == 0) {
                 myStory(holder.addStoryText, holder.storyPlus, true, holder)
             } else {
                 val intent = Intent(aCtx, StoryActivity::class.java)
@@ -55,8 +55,8 @@ class StoryAdapter(private val aCtx: Context, private val list: List<StoryModel>
                 aCtx.startActivity(intent)
             }
         }
-
     }
+
 
     override fun getItemCount(): Int {
         return list.size

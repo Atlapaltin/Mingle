@@ -9,8 +9,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.iksanova.mingle.R
-import com.iksanova.mingle.data.remote.ApiService
-import com.iksanova.mingle.data.remote.RetrofitClient
 import com.iksanova.mingle.ui.home.HomeActivity
 import retrofit2.Call
 import retrofit2.Callback
@@ -38,8 +36,6 @@ class JoinNowActivity : AppCompatActivity() {
             Callback<MediaSessionCompat.Token> {
             override fun onResponse(call: Call<MediaSessionCompat.Token>, response: Response<MediaSessionCompat.Token>) {
                 if (response.isSuccessful) {
-                    val token = response.body()?.token
-                    // Save the token to shared preferences or other storage
                     startActivity(Intent(this@JoinNowActivity, HomeActivity::class.java))
                 } else {
                     val error = Gson().fromJson(response.errorBody()?.charStream(), Error::class.java)
