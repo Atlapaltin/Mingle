@@ -6,10 +6,11 @@ import retrofit2.http.POST
 import retrofit2.http.Field
 
 interface ApiService {
-    @POST("register")
+    @POST("registration")
     fun registerUser(
-        @Field("email") email: String,
+        @Field("login") email: String,
         @Field("password") password: String
-    ): Call<MediaSessionCompat.Token>
+
+    ): Call<Token>
 }
 

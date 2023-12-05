@@ -2,7 +2,6 @@ package com.iksanova.mingle.ui.login
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.media.session.MediaSessionCompat
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -33,9 +32,14 @@ class JoinNowActivity : AppCompatActivity() {
         val password = findViewById<EditText>(R.id.edit_password).text.toString()
 
         apiService.registerUser(email, password).enqueue(object :
-            Callback<MediaSessionCompat.Token> {
-            override fun onResponse(call: Call<MediaSessionCompat.Token>, response: Response<MediaSessionCompat.Token>) {
+            Callback<Token> {
+            override fun onResponse(call: Call<Token>, response: Response<Token>) {
                 if (response.isSuccessful) {
+                    // Save the token
+                    val id = response.body()?.id
+                    val token = response.body()?.token
+                    saveTokenToSharedPreferences(id, token)
+
                     startActivity(Intent(this@JoinNowActivity, HomeActivity::class.java))
                 } else {
                     val error = Gson().fromJson(response.errorBody()?.charStream(), Error::class.java)
@@ -43,10 +47,18 @@ class JoinNowActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<MediaSessionCompat.Token>, t: Throwable) {
+            override fun onFailure(call: Call<Token>, t: Throwable) {
                 Toast.makeText(this@JoinNowActivity, "Registration failed.", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun saveTokenToSharedPreferences(id: Long?, token: String?) {
+        val sharedPreferences = getSharedPreferences("TOKEN_PREFS", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("id", id.toString())
+        editor.putString("token", token)
+        editor.apply()
     }
 }
 
