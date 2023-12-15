@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.media.session.MediaSessionCompat
-import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,55 +15,46 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.iksanova.mingle.R
 import com.iksanova.mingle.adapters.AppDescriptionSliderAdapter
+import com.iksanova.mingle.databinding.ActivityLoginBinding
 import com.iksanova.mingle.helper.ServiceListener
 import com.iksanova.mingle.ui.home.HomeActivity
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import java.io.IOException
-import okhttp3.Call
-import okhttp3.Callback
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
+import java.io.IOException
 
 class LoginActivity : AppCompatActivity(), ServiceListener {
-    private var viewPager: ViewPager
-    private var dotsLayout: LinearLayout
-    private var appDescriptionSliderAdapter: AppDescriptionSliderAdapter
-    private var dots: Array<TextView>
-    private var btnSignIn: TextView
+    private lateinit var binding: ActivityLoginBinding
+    private lateinit var appDescriptionSliderAdapter: AppDescriptionSliderAdapter
+    private lateinit var dots: Array<TextView>
     private var accessToken: String = ""
-
-    init {
-        viewPager = ViewPager(this)
-        dotsLayout = LinearLayout(this)
-        appDescriptionSliderAdapter = AppDescriptionSliderAdapter(this)
-        dots = arrayOf(TextView(this))
-        btnSignIn = TextView(this)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
-        viewPager = findViewById(R.id.viewPager)
-        dotsLayout = findViewById(R.id.dots)
-        //Call Adapter
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Initialize the adapter and other variables
         appDescriptionSliderAdapter = AppDescriptionSliderAdapter(this)
-        viewPager.adapter = appDescriptionSliderAdapter
+        dots = arrayOf(TextView(binding.root.context))
+
+        // Set up the viewPager and dotsLayout
+        binding.viewPager.adapter = appDescriptionSliderAdapter
         addDots(0)
-        viewPager.addOnPageChangeListener(changeListener)
-        btnSignIn = findViewById(R.id.btn_signIn)
-        btnSignIn.setOnClickListener { signInWithEmail() }
+        binding.viewPager.addOnPageChangeListener(changeListener)
+
+        // Set up the signIn button click listener
+        binding.btnSignIn.setOnClickListener { signInWithEmail() }
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun addDots(position: Int) {
         dots = arrayOfNulls<TextView>(3) as? Array<TextView> ?: emptyArray()
-        dotsLayout.removeAllViews()
+        binding.dots.removeAllViews()
         for (i in dots.indices) {
-            dots[i] = TextView(this)
+            dots[i] = TextView(binding.root.context)
             dots[i].text = HtmlCompat.fromHtml("&#8226", HtmlCompat.FROM_HTML_MODE_LEGACY)
             dots[i].textSize = 45f
-            dotsLayout.addView(dots[i])
+            binding.dots.addView(dots[i])
         }
         if (dots.isNotEmpty()) {
             dots[position].setTextColor(ContextCompat.getColor(this, R.color.black))
@@ -82,10 +71,8 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
     }
 
     private fun signInWithEmail() {
-        val emailEditText = findViewById<EditText>(R.id.edit_email)
-        val passwordEditText = findViewById<EditText>(R.id.edit_password)
-        val email = emailEditText.text.toString()
-        val password = passwordEditText.text.toString()
+        val email = binding.emailEditText.text.toString()
+        val password = binding.passwordEditText.text.toString()
 
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
@@ -98,7 +85,8 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
 
         val request = Request.Builder()
             .url("https://netomedia.ru/api/users/")
-            .post(requestBody.toRequestBody("application/json".toMediaTypeOrNull()))
+            .post(gson.toJson(authenticationRequest(email, password))
+                .toRequestBody("application/json".toMediaTypeOrNull()))
             .build()
 
         val client = OkHttpClient()
@@ -126,6 +114,7 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
                     }
                 }
             }
+
         })
     }
 
@@ -164,6 +153,8 @@ class LoginActivity : AppCompatActivity(), ServiceListener {
         return gson.fromJson(response.body?.string(), JsonElement::class.java)
     }
 }
+
+
 
 
 

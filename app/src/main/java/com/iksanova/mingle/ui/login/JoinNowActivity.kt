@@ -12,24 +12,27 @@ import com.iksanova.mingle.ui.home.HomeActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.databinding.DataBindingUtil
+import com.iksanova.mingle.databinding.ActivityJoinNowBinding
 
 class JoinNowActivity : AppCompatActivity() {
 
     private lateinit var continueBtn: Button
     private lateinit var apiService: ApiService
+    private lateinit var binding: ActivityJoinNowBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_join_now)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_join_now)
         apiService = RetrofitClient.getClient().create(ApiService::class.java)
 
-        continueBtn = findViewById(R.id.continue_btn)
+        continueBtn = binding.continueBtn
         continueBtn.setOnClickListener { signIn() }
     }
 
     private fun signIn() {
-        val email = findViewById<EditText>(R.id.edit_email).text.toString()
-        val password = findViewById<EditText>(R.id.edit_password).text.toString()
+        val email = binding.emailEditText.text.toString()
+        val password = binding.passwordEditText.text.toString()
 
         apiService.registerUser(email, password).enqueue(object :
             Callback<Token> {
@@ -60,6 +63,7 @@ class JoinNowActivity : AppCompatActivity() {
         editor.putString("token", token)
         editor.apply()
     }
+
+    data class Error(val reason: String)
 }
 
-data class Error(val reason: String)
