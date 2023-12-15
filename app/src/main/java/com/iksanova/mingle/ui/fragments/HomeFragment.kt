@@ -8,13 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.bumptech.glide.Glide
 import com.iksanova.mingle.R
 import com.iksanova.mingle.adapters.PostAdapter
 import com.iksanova.mingle.adapters.StoryAdapter
@@ -22,48 +16,44 @@ import com.iksanova.mingle.constants.Constants.ALL_POSTS
 import com.iksanova.mingle.constants.Constants.INFO
 import com.iksanova.mingle.constants.Constants.STORY
 import com.iksanova.mingle.constants.Constants.USER_CONSTANT
+import com.iksanova.mingle.databinding.FragmentHomeBinding
 import com.iksanova.mingle.models.PostModel
 import com.iksanova.mingle.models.StoryModel
 import com.iksanova.mingle.models.UserModel
-import com.todkars.shimmer.ShimmerRecyclerView
+import com.iksanova.mingle.utils.AppSharedPreferences
 
 class HomeFragment : Fragment() {
-    private lateinit var user: FirebaseUser
-    private var list: MutableList<PostModel> = mutableListOf()
-    private lateinit var adapter: PostAdapter
-    private lateinit var recyclerView: ShimmerRecyclerView
-    private lateinit var recyclerViewStory: ShimmerRecyclerView
-    private lateinit var ref: DatabaseReference
-    private var storyModelList: MutableList<StoryModel> = mutableListOf()
-    private lateinit var storyAdapter: StoryAdapter
-    private var followingList: MutableList<String> = mutableListOf()
+    private lateinit var binding: FragmentHomeBinding
+    private lateinit var appSharedPreferences: AppSharedPreferences
+    private var selectedFragment: Fragment? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
-        recyclerView = view.findViewById(R.id.post_recycler)
-        recyclerViewStory = view.findViewById(R.id.story_recycler)
-        user = FirebaseAuth.getInstance().currentUser!!
-        ref = FirebaseDatabase.getInstance().reference
-        ref.keepSynced(true)
-        return view
-    }
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
+        appSharedPreferences = AppSharedPreferences(requireContext())
+
+        //Set up the views using ViewBinding
+        val user = appSharedPreferences.getUser()
+        Glide.with(requireContext()).load(user.image).into(binding.ivUserImage)
+        binding.tvUsername.text = user.username
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         //Post RecyclerView
-        recyclerView.showShimmer()
-        adapter = PostAdapter(requireContext(), list)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.isNestedScrollingEnabled = false
+        binding.recyclerView.showShimmer()
+        val adapter = PostAdapter(requireContext(), mutableListOf())
+        binding.recyclerView.setHasFixedSize(true)
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.isNestedScrollingEnabled = false
+        binding.recyclerView.adapter = adapter
 
         //Story RecyclerView
-        storyAdapter = StoryAdapter(requireActivity(), storyModelList)
-        recyclerViewStory.setHasFixedSize(true)
-        recyclerViewStory.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
-        recyclerViewStory.adapter = storyAdapter
-        recyclerViewStory.isNestedScrollingEnabled = false
+        val storyAdapter = StoryAdapter(requireActivity(), mutableListOf())
+        binding.recyclerViewStory.setHasFixedSize(true)
+        binding.recyclerViewStory.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
+        binding.recyclerViewStory.adapter = storyAdapter
+        binding.recyclerViewStory.isNestedScrollingEnabled = false
 
         //Functions
         readPosts()
@@ -72,7 +62,7 @@ class HomeFragment : Fragment() {
 
     //----------------------------------Read Posts--------------------------------//
     private fun readPosts() {
-        recyclerView.hideShimmer()
+        binding.recyclerView.hideShimmer()
         ref.child(ALL_POSTS).addListenerForSingleValueEvent(object : ValueEventListener {
             @SuppressLint("NotifyDataSetChanged")
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -92,7 +82,8 @@ class HomeFragment : Fragment() {
 
     //--------------------------------Get All Users Id--------------------------------//
     private fun getAllUsersId() {
-        followingList = mutableListOf()
+        val followingList: MutableList<String> = mutableListOf()
+        val user = appSharedPreferences.getUser()
         ref.child(USER_CONSTANT).addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 followingList.clear()
