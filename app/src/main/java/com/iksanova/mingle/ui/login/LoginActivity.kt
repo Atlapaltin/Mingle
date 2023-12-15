@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.viewpager.widget.ViewPager
-import com.google.firebase.database.*
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -29,12 +28,20 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 
 class LoginActivity : AppCompatActivity(), ServiceListener {
-    private lateinit var viewPager: ViewPager
-    private lateinit var dotsLayout: LinearLayout
-    private lateinit var appDescriptionSliderAdapter: AppDescriptionSliderAdapter
-    private lateinit var dots: Array<TextView>
-    private lateinit var btnSignIn: TextView
-    private lateinit var accessToken: String
+    private var viewPager: ViewPager
+    private var dotsLayout: LinearLayout
+    private var appDescriptionSliderAdapter: AppDescriptionSliderAdapter
+    private var dots: Array<TextView>
+    private var btnSignIn: TextView
+    private var accessToken: String = ""
+
+    init {
+        viewPager = ViewPager(this)
+        dotsLayout = LinearLayout(this)
+        appDescriptionSliderAdapter = AppDescriptionSliderAdapter(this)
+        dots = arrayOf(TextView(this))
+        btnSignIn = TextView(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
